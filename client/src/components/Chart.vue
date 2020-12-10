@@ -6,7 +6,6 @@
 <script>
 
 import Plotly from 'plotly.js-dist'
-import { colors } from 'quasar'
 
 export default {
   name: 'Chart',
@@ -20,12 +19,11 @@ export default {
 
       let plots = [];
       for (let [id_experiment, v] of Object.entries(this.data)) {
-        const c = colors.getBrand('primary')
         let data = {
           x: v["x"],
           y: v["y_val"],
           marker: {
-            color: c
+            color: v["color"]
           },
           name: id_experiment,
           hoverinfo: 'none',
@@ -37,7 +35,7 @@ export default {
     },
     make_layout: function(title, yaxis_label) {
       let layout = {
-        margin: { l: 20, t: 30.0, r : 20, b: 30 },
+        margin: { l: 30, t: 30.0, r : 30, b: 30 },
         title : title,
         titlefont : {size : 16},
         pad : 0,

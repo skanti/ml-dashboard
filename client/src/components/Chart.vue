@@ -26,7 +26,6 @@ export default {
             color: v["color"]
           },
           name: id_experiment,
-          hoverinfo: 'none',
           type: 'line'
         };
         plots.push(data);

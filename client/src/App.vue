@@ -46,11 +46,10 @@
             <template v-slot:body="props">
               <q-tr class="cursor-pointer" :class="selected.has(props.row.id) ? 'bg-blue-3' : 'bg-grey-1'"
                 :props="props" @click="click_experiment(props.row)">
-                <q-td  v-for="col in props.cols" :key="col.name" :props="props" >
-                  <div v-if="col.name != 'color'">
-                    {{ col.value }}
-                  </div>
-                  <q-btn v-if="col.name == 'color' && data[props.row.id] && selected.has(props.row.id)"
+                <q-td  key="id" :props="props" > {{ props.row.id }} </q-td>
+                <q-td  key="timestamp" :props="props" > {{ props.row.timestamp }} </q-td>
+                <q-td  key="color" :props="props" >
+                  <q-btn v-if="data[props.row.id] && selected.has(props.row.id)"
                     icon="fas fa-palette" :style="'background-color: white; color:' + data[props.row.id].color"
                     dense />
                 </q-td>
@@ -64,8 +63,9 @@
       <!-- table -->
 
       <div class="col-12 col-sm-9">
-        <div class="q-pa-md">
+        <div class="q-pb-md q-gutter-md">
           <q-btn label="Refresh" icon="fas fa-sync-alt" color="orange-5" @click="click_refresh" />
+          <q-circular-progress :value="parseInt(100*timer.value/timer.max)" size="md" color="orange-5" :max="100.0" show-value />
         </div>
         <div class="row q-col-gutter-md" >
           <div :class="'col-12 col-sm-' + card_size" v-for="[k,v] in Object.entries(charts)"
@@ -88,6 +88,8 @@
 import axios from 'axios';
 //import { mapState } from 'vuex'
 import Chart from "@/components/Chart";
+import { copyToClipboard } from 'quasar'
+
 
 
 export default {
@@ -100,6 +102,10 @@ export default {
       data: {},
       selected: new Set(),
       loading: false,
+      timer: {
+        value: 0,
+        max: 30, // <- in seconds
+      },
       card_size: 4,
       filter: "",
       pagination: { sortBy: 'timestamp', descending: true, page: 1, rowsPerPage: 20 },
@@ -111,8 +117,8 @@ export default {
     }
   },
   created: function () {
-    if (this.project_dir)
-      this.click_search_experiments();
+    this.click_refresh();
+    this.auto_refresh();
   },
   computed: {
     //...mapState([ "project_dir" ])
@@ -183,6 +189,9 @@ export default {
       let id = row.id;
       this.loading = true;
       let selected = new Set(this.selected);
+      copyToClipboard(id).then(() => {
+        console.log("Copied to clipboard");
+      });
       if (selected.has(id)) {
         selected.delete(id);
       } else {
@@ -200,10 +209,11 @@ export default {
       this.loading = false;
     },
     click_refresh: async function() {
+      await this.click_search_experiments();
       this.loading = true;
       for (let row of this.experiments) {
         let id = row.id;
-        if (this.selected.has(id)) { 
+        if (this.selected.has(id)) {
           let res = await axios.get(process.env.VUE_APP_URL_SERVER + "/experiment", { params: row });
           let data_old = this.data[id];
           this.data[id] = res.data;
@@ -212,6 +222,18 @@ export default {
       }
       this.counter += 1;
       this.loading = false;
+    },
+    auto_refresh: function() {
+      let timer = setInterval(() => {
+        this.timer.value += 1.0;
+        if (this.timer.value >= this.timer.max) {
+          console.log("refresh");
+          this.timer.value = 0;
+          this.click_refresh();
+          clearInterval(timer);
+          this.auto_refresh();
+        }
+      }, 1000);
     }
   },
 }

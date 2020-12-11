@@ -64,6 +64,9 @@
       <!-- table -->
 
       <div class="col-12 col-sm-9">
+        <div class="q-pa-md">
+          <q-btn label="Refresh" icon="fas fa-sync-alt" color="orange-5" @click="click_refresh" />
+        </div>
         <div class="row q-col-gutter-md" >
           <div :class="'col-12 col-sm-' + card_size" v-for="[k,v] in Object.entries(charts)"
             :key="'root_plot' + k + '_no_' + counter">
@@ -194,6 +197,20 @@ export default {
         }
       }
       this.selected = selected;
+      this.loading = false;
+    },
+    click_refresh: async function() {
+      this.loading = true;
+      for (let row of this.experiments) {
+        let id = row.id;
+        if (this.selected.has(id)) { 
+          let res = await axios.get(process.env.VUE_APP_URL_SERVER + "/experiment", { params: row });
+          let data_old = this.data[id];
+          this.data[id] = res.data;
+          this.data[id].color = data_old.color;
+        }
+      }
+      this.counter += 1;
       this.loading = false;
     }
   },

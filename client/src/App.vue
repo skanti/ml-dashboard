@@ -46,9 +46,14 @@
             <template v-slot:body="props">
               <q-tr class="cursor-pointer" :class="selected.has(props.row.id) ? 'bg-blue-3' : 'bg-grey-1'"
                 :props="props" @click="click_experiment(props.row)">
-                <q-td  key="id" :props="props" > {{ props.row.id }} </q-td>
-                <q-td  key="timestamp" :props="props" > {{ props.row.timestamp }} </q-td>
-                <q-td  key="color" :props="props" >
+                <q-td  key="id" :props="props">
+                  <q-btn color="grey-8" class="text-bold" :label="props.row.id" size="sm"
+                    @click="e => click_copy_to_clipboard(e, props.row.id)" dense no-caps>
+                    <q-tooltip> Copy to clipboard </q-tooltip>
+                  </q-btn>
+                </q-td>
+                <q-td key="timestamp" :props="props" > {{ props.row.timestamp }} </q-td>
+                <q-td key="color" :props="props" >
                   <q-btn v-if="data[props.row.id] && selected.has(props.row.id)"
                     icon="fas fa-palette" :style="'background-color: white; color:' + data[props.row.id].color"
                     dense />
@@ -189,9 +194,6 @@ export default {
       let id = row.id;
       this.loading = true;
       let selected = new Set(this.selected);
-      copyToClipboard(id).then(() => {
-        console.log("Copied to clipboard");
-      });
       if (selected.has(id)) {
         selected.delete(id);
       } else {
@@ -234,6 +236,12 @@ export default {
           this.auto_refresh();
         }
       }, 1000);
+    },
+    click_copy_to_clipboard: function(e, id) {
+      copyToClipboard(id).then(() => {
+        console.log("Copied to clipboard");
+      });
+      e.stopPropagation();
     }
   },
 }

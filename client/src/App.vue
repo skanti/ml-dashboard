@@ -27,33 +27,32 @@
       <div class="col-12 col-sm-3">
         <q-card color="blue-5">
           <q-table ref="my_table" tabindex="0" title="Experiments" :data="experiments" :loading="loading"
-            :columns="columns" :pagination="pagination" row-key="id"
-            :selected="selected" :filter="filter" @row-click="click_experiment">
+            :columns="columns" :pagination="pagination" row-key="id" :filter="filter" @row-click="click_experiment">
             <!-- header -->
             <template v-slot:top>
-              <q-card class="fit bg-blue-1" flat>
+              <q-card class="fit" flat>
                 <q-card-section>
-                  <q-input borderless dense debounce="300" v-model="filter" placeholder="Fuzzy Search">
+                  <q-input dense debounce="300" v-model="filter" placeholder="Fuzzy Search">
                     <template v-slot:append>
                       <q-icon name="fas fa-search" />
                     </template>
                   </q-input>
                 </q-card-section>
-                <q-separator inset> </q-separator>
               </q-card>
             </template>
             <!-- header -->
 
             <!-- body -->
             <template v-slot:body="props">
-              <q-tr class="cursor-pointer" :class="selected.includes(props.row) ? 'bg-blue-3' : 'bg-grey-1'"
+              <q-tr class="cursor-pointer" :class="selected.has(props.row.id) ? 'bg-blue-3' : 'bg-grey-1'"
                 :props="props" @click="click_experiment(props.row)">
                 <q-td  v-for="col in props.cols" :key="col.name" :props="props" >
                   <div v-if="col.name != 'color'">
                     {{ col.value }}
                   </div>
-                  <q-btn v-else class="cursor-pointer" icon="fas fa-palette" :props="props"
-                    :style="'background-color: white; color:' + col.value" @click="e => click_change_color(e, props.row)" dense />
+                  <q-btn v-if="col.name == 'color' && data[props.row.id] && selected.has(props.row.id)"
+                    icon="fas fa-palette" :style="'background-color: white; color:' + data[props.row.id].color"
+                    dense />
                 </q-td>
               </q-tr>
             </template>
@@ -95,11 +94,11 @@ export default {
     return {
       counter: 0,
       experiments: [],
-      loading: false,
       data: {},
+      selected: new Set(),
+      loading: false,
       card_size: 4,
       filter: "",
-      selected: [],
       pagination: { sortBy: 'timestamp', descending: true, page: 1, rowsPerPage: 20 },
       columns: [
         { name: 'id', align: 'left', label: 'ID', field: 'id', sortable: true },
@@ -124,8 +123,7 @@ export default {
     },
     charts: function() {
       let charts = {};
-      for (let experiment of Object.values(this.selected)) {
-        const id = experiment.id;
+      for (let id of Array.from(this.selected)) {
         const plot_data = this.data[id];
         if (plot_data == undefined)
           continue;
@@ -156,7 +154,7 @@ export default {
           charts[stats_name][id]["y_train"] = y_train[stats_name];
           charts[stats_name][id]["y_val"] = y_val[stats_name];
           charts[stats_name][id]["x"] = x;
-          charts[stats_name][id]["color"] = experiment.color;
+          charts[stats_name][id]["color"] = plot_data.color;
         }
       }
       this.counter += 1;
@@ -169,9 +167,6 @@ export default {
       let query = { project_dir: this.project_dir };
       let res = await axios.get(process.env.VUE_APP_URL_SERVER + "/project", { params: query });
       this.experiments = res.data;
-      for (let r of Object.values(this.experiments)) {
-        r["color"] = this.random_color();
-      }
       this.loading = false;
     },
     random_color: function() {
@@ -182,23 +177,24 @@ export default {
       return color;
     },
     click_experiment: async function(row) {
+      let id = row.id;
       this.loading = true;
-      if (this.selected.includes(row)) {
-        this.selected = this.selected.filter(x => x != row);
+      let selected = new Set(this.selected);
+      if (selected.has(id)) {
+        selected.delete(id);
       } else {
-        let id = row.id;
-        let res = await axios.get(process.env.VUE_APP_URL_SERVER + "/experiment", { params: row });
-        this.data[id] = res.data;
-        this.selected.push(row);
+        try {
+          let res = await axios.get(process.env.VUE_APP_URL_SERVER + "/experiment", { params: row });
+          this.data[id] = res.data;
+          this.data[id]["color"] = this.random_color();
+          selected.add(id);
+        } catch (e) {
+          this.$q.notify({ message: 'Failed to load experiment', icon: 'fas fa-exclamation-triangle',
+            color: "red-5" });
+        }
       }
+      this.selected = selected;
       this.loading = false;
-    },
-    click_change_color: function(evt, row) {
-      let idx = this.experiments.indexOf(row);
-      row["color"] = this.random_color();
-      this.$set(this.experiments, idx, row);
-      this.counter += 1;
-      evt.stopPropagation();
     }
   },
 }

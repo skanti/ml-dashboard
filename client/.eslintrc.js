@@ -5,6 +5,6 @@ module.exports = {
   ],
   rules: {
     'vue/no-side-effects-in-computed-properties': 'off',
-    'vue/no-unused-vars': 'warning'
+    'vue/no-unused-vars': 'warn'
   }
 } 

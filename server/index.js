@@ -60,19 +60,22 @@ router.get("/experiment", function (req, res, next) {
   let experiment_dir = req.query.path
 
   let log_path = experiment_dir + "/log_eval.json"
-  let log = JSON.parse(fs.readFileSync(log_path));
-
-  glob(experiment_dir + "/**/*", function (err, files) {
-    const is_dir = source => fs.lstatSync(source).isDirectory();
-    files = files.filter(is_dir);
-    //files = files.map(x => path.join("/", path.dirname(x).split("/").slice(2).join()));
-    files = files.map( x => {
-      x = x.substring(x.indexOf('/') + 1);
-      return x.substring(x.indexOf('/'));
+  try {
+    let log = JSON.parse(fs.readFileSync(log_path));
+    glob(experiment_dir + "/**/*", function (err, files) {
+      const is_dir = source => fs.lstatSync(source).isDirectory();
+      files = files.filter(is_dir);
+      //files = files.map(x => path.join("/", path.dirname(x).split("/").slice(2).join()));
+      files = files.map( x => {
+        x = x.substring(x.indexOf('/') + 1);
+        return x.substring(x.indexOf('/'));
+      });
+      let ret = { "log": log, "dirs": files };
+      res.send(ret);
     });
-    let ret = { "log": log, "dirs": files };
-    res.send(ret);
-  });
+  } catch(e) {
+    return res.status(500).send(e);
+  }
 });
 
 // <--

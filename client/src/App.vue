@@ -46,17 +46,22 @@
             <template v-slot:body="props">
               <q-tr class="cursor-pointer" :class="selected.has(props.row.id) ? 'bg-blue-3' : 'bg-grey-1'"
                 :props="props" @click="click_experiment(props.row)">
+                <q-td key="color" :props="props" >
+                  <q-avatar v-if="data[props.row.id] && selected.has(props.row.id)" size="sm"
+                    icon="fas fa-palette" :style="'background-color: white; color:' + data[props.row.id].color"
+                    font-size="16px" />
+                </q-td>
                 <q-td  key="id" :props="props">
-                  <q-btn color="grey-8" class="text-bold" :label="props.row.id" size="sm"
+                  <q-btn color="grey-8" class="text-bold" size="sm"
                     @click="e => click_copy_to_clipboard(e, props.row.id)" dense no-caps>
+                    <div class="ellipsis"> {{ props.row.id }} </div>
                     <q-tooltip> Copy to clipboard </q-tooltip>
                   </q-btn>
                 </q-td>
-                <q-td key="timestamp" :props="props" > {{ props.row.timestamp }} </q-td>
-                <q-td key="color" :props="props" >
-                  <q-btn v-if="data[props.row.id] && selected.has(props.row.id)"
-                    icon="fas fa-palette" :style="'background-color: white; color:' + data[props.row.id].color"
-                    dense />
+                <q-td key="timestamp" :props="props" >
+                  <q-btn size="sm" icon="fas fa-clock" dense> 
+                    <q-tooltip> {{ props.row.timestamp }} </q-tooltip>
+                  </q-btn>
                 </q-td>
               </q-tr>
             </template>
@@ -115,9 +120,9 @@ export default {
       filter: "",
       pagination: { sortBy: 'timestamp', descending: true, page: 1, rowsPerPage: 20 },
       columns: [
+        { name: 'color', align: 'left', label: 'Color', field: 'color' },
         { name: 'id', align: 'left', label: 'ID', field: 'id', sortable: true },
-        { name: 'timestamp', align: 'left', label: 'Timestamp', field: 'timestamp', sortable: true },
-        { name: 'color', align: 'right', label: 'Color', field: 'color' },
+        { name: 'timestamp', align: 'left', label: 'Date', field: 'timestamp', sortable: true },
       ]
     }
   },
@@ -211,6 +216,8 @@ export default {
       this.loading = false;
     },
     click_refresh: async function() {
+      if (this.project_dir == "")
+        return;
       await this.click_search_experiments();
       this.loading = true;
       for (let row of this.experiments) {

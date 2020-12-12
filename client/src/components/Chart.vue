@@ -34,7 +34,7 @@ export default {
     },
     make_layout: function(title, yaxis_label) {
       let layout = {
-        margin: { l: 30, t: 30.0, r : 30, b: 30 },
+        margin: { l: 30, t: 30.0, r : 5, b: 30 },
         title : title,
         titlefont : {size : 16},
         pad : 0,

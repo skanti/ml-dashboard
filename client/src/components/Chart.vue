@@ -19,16 +19,29 @@ export default {
 
       let plots = [];
       for (let [id_experiment, v] of Object.entries(this.data)) {
-        let data = {
+        let data_val = {
           x: v["x"],
           y: v["y_val"],
           marker: {
             color: v["color"]
           },
           name: id_experiment,
-          type: 'line'
+          showlegend: true,
+          mode: 'lines'
         };
-        plots.push(data);
+        let data_train = {
+          x: v["x"],
+          y: v["y_train"],
+          marker: {
+            color: v["color"]
+          },
+          name: id_experiment,
+          showlegend: false,
+          mode: 'lines',
+          line: { dash: 'dash' }
+        };
+        plots.push(data_val);
+        plots.push(data_train);
       }
       Plotly.newPlot("plot_" + this.id, plots, layout, { displayModeBar: false })
     },

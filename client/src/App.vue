@@ -118,7 +118,7 @@ export default {
       },
       card_size: 4,
       filter: "",
-      pagination: { sortBy: 'timestamp', descending: true, page: 1, rowsPerPage: 20 },
+      pagination: { sortBy: 'timestamp', descending: true, page: 1, rowsPerPage: 50 },
       columns: [
         { name: 'color', align: 'left', label: 'Color', field: 'color' },
         { name: 'id', align: 'left', label: 'ID', field: 'id', sortable: true },

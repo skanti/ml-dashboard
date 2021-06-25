@@ -76,10 +76,10 @@
       </div>
       <div class="row q-col-gutter-md" >
         <div :class="'col-12 col-sm-' + card_size" v-for="[k,v] in Object.entries(charts)"
-          :key="'root_plot' + k + '_no_' + counter">
+          :key="'root_plot' + k + '_idx' + counter">
           <q-card class="bg-grey-1">
             <q-responsive :ratio="1">
-              <Chart :id="k" :data="v"> </Chart>
+              <Chart :metric="k" :data="v"> </Chart>
             </q-responsive>
           </q-card>
         </div>
@@ -106,6 +106,7 @@ export default {
       experiments: [],
       data: {},
       selected: new Set(),
+      charts: {},
       loading: false,
       timer: {
         value: 0,
@@ -135,7 +136,9 @@ export default {
         this.$store.commit("project_dir", v);
       }
     },
-    charts: function() {
+  },
+  watch: {
+    selected(value_new, value_old) {
       let charts = {};
       for (let id of Array.from(this.selected)) {
         const plot_data = this.data[id]["rows"];
@@ -151,12 +154,16 @@ export default {
           const x_train = lodash(plot_data).filter({stage: 0}).groupBy("step").keys().value()
           const y_val = lodash(plot_data).filter({stage: 1}).groupBy(metric).keys().value()
           const x_val = lodash(plot_data).filter({stage: 1}).groupBy("step").keys().value()
-          charts[metric] = { name: id, train: { y: y_train, x: x_train }, val: { y: y_val, x: x_val}, color: color};
+          const chart = { experiment_id: id, metric: metric,
+            train: { y: y_train, x: x_train }, val: { y: y_val, x: x_val}, color: color};
+
+          charts[metric] = charts[metric] || [];
+          charts[metric].push(chart);
         }
-        //this.counter += 1;
       }
-      return charts;
-    },
+      this.counter += 1;
+      this.charts = charts;
+    }
   },
   methods: {
     click_search_experiments: function() {

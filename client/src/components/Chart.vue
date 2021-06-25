@@ -1,6 +1,5 @@
 <template>
-  <div :id="'plot_' + id">
-  </div>
+  <div :id="'plot_' + metric"/>
 </template>
 
 <script>
@@ -9,41 +8,43 @@ import Plotly from 'plotly.js-dist'
 
 export default {
   name: 'Chart',
-  props: [ "id", "data" ],
+  props: [ "metric", "data" ],
   mounted: function() {
     this.init();
   },
   methods: {
     init: function() {
-      const layout = this.make_layout(this.id, "");
+      const layout = this.make_layout(this.metric, "");
       const experiment = this.data;
 
       let plots = [];
-      let metric = experiment["name"];
-      let data_val = {
-        x: experiment["val"]["x"],
-        y: experiment["val"]["y"],
-        marker: {
-          color: experiment["color"]
-        },
-        name: metric,
-        showlegend: true,
-        mode: 'lines'
+      for (const experiment of this.data) {
+        let experiment_id = experiment["experiment_id"];
+        let data_val = {
+          x: experiment["val"]["x"],
+          y: experiment["val"]["y"],
+          marker: {
+            color: experiment["color"]
+          },
+          name: experiment_id,
+          showlegend: true,
+          mode: 'lines'
+        };
+        let data_train = {
+          x: experiment["train"]["x"],
+          y: experiment["train"]["y"],
+          marker: {
+            color: experiment["color"]
+          },
+          name: experiment_id,
+          showlegend: false,
+          mode: 'lines',
+          line: { dash: 'dash' }
+        };
+        plots.push(data_val);
+        plots.push(data_train);
       };
-      let data_train = {
-        x: experiment["train"]["x"],
-        y: experiment["train"]["y"],
-        marker: {
-          color: experiment["color"]
-        },
-        name: metric,
-        showlegend: false,
-        mode: 'lines',
-        line: { dash: 'dash' }
-      };
-      plots.push(data_val);
-      plots.push(data_train);
-      Plotly.newPlot("plot_" + this.id, plots, layout, { displayModeBar: false })
+      Plotly.newPlot("plot_" + this.metric, plots, layout, { displayModeBar: false, responsive: true })
     },
     make_layout: function(title, yaxis_label) {
       let layout = {

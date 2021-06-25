@@ -49,14 +49,14 @@
                   font-size="16px" />
               </q-td>
               <q-td  key="id" :props="props">
-                <q-btn color="grey-8" class="text-bold" size="sm"
-                  @click="e => click_copy_to_clipboard(e, props.row.id)" dense no-caps>
+                <q-btn color="dark" class="text-bold" size="sm"
+                  @click="e => click_copy_to_clipboard(e, props.row.id)" flat dense no-caps>
                   <div class="ellipsis"> {{ props.row.id }} </div>
                   <q-tooltip> Copy to clipboard </q-tooltip>
                 </q-btn>
               </q-td>
               <q-td key="timestamp" :props="props" >
-                <q-btn size="sm" icon="schedule" dense>
+                <q-btn size="sm" icon="schedule" dense flat>
                   <q-tooltip> {{ props.row.timestamp }} </q-tooltip>
                 </q-btn>
               </q-td>
@@ -137,12 +137,13 @@ export default {
       }
     },
     charts: function() {
-      /*
       let charts = {};
       for (let id of Array.from(this.selected)) {
         const plot_data = this.data[id];
         if (plot_data == undefined)
           continue;
+          console.log(plot_data);
+          return 0;
 
         let x = []
         let y_train = {};
@@ -173,10 +174,8 @@ export default {
           charts[stats_name][id]["color"] = plot_data.color;
         }
       }
-      this.counter += 1;
+      //this.counter += 1;
       return charts;
-       */
-      return 0;
     },
   },
   methods: {
@@ -203,13 +202,14 @@ export default {
       if (selected.has(id)) {
         selected.delete(id);
       } else {
-        axios.get("/api/experiment", { params: { project_dir: this.project_dir, experiment: row }}).then(res => {
+        try {
+          const res = await axios.get("/api/experiment", { params: { project_dir: this.project_dir, experiment: row }});
           this.data[id] = res.data;
           this.data[id]["color"] = this.random_color();
           selected.add(id);
-        }).catch (e => {
+        } catch (e) {
           this.$q.notify({ message: 'Failed to load experiment', icon: 'error', color: "red-5" });
-        });
+        };
       }
       this.selected = selected;
       this.loading = false;
@@ -235,7 +235,6 @@ export default {
       let timer = setInterval(() => {
         this.timer.value += 1.0;
         if (this.timer.value >= this.timer.max) {
-          console.log("refresh");
           this.timer.value = 0;
           this.click_refresh();
           clearInterval(timer);
@@ -245,7 +244,7 @@ export default {
     },
     click_copy_to_clipboard: function(e, id) {
       copyToClipboard(id).then(() => {
-        console.log("Copied to clipboard");
+        this.$q.notify({ message: "Copied to clipboard!", icon: 'check_circle', color: "green-5" });
       });
       e.stopPropagation();
     }

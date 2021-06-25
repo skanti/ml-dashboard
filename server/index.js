@@ -28,7 +28,10 @@ app.get("/api/project", function (req, res, next) {
   glob(search_dir, options, function (err, experiments) {
     if (err)
       return res.send(err);
-    experiments = experiments.map(x => ({id: path.basename(x)}));
+    experiments = experiments.map(x => {
+      const stats = fs.statSync(x);
+      return { id: path.basename(x), timestamp: stats.mtime };
+      });
     res.send(experiments);
   });
 
@@ -38,7 +41,6 @@ app.get("/api/experiment", function (req, res, next) {
   let { project_dir, experiment } = req.query;
   experiment = JSON.parse(experiment);
   const search_dir = project_dir + "/" + experiment.id + "/log/version_*";
-  console.log(search_dir);
   const options = { };
   glob(search_dir, options, function (err, outputs) {
     if (err)
@@ -61,9 +63,8 @@ app.get("/api/experiment", function (req, res, next) {
       .pipe(csv())
       .on('data', (data) => rows.push(data))
       .on('end', () => {
-        console.log(rows);
+        res.send(rows);
       });
-    res.send(rows);
   });
 });
 

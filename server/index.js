@@ -1,98 +1,97 @@
-const env = require('dotenv').config({ path: "./.env" });
+const env = require('dotenv').config()
 require('dotenv-expand')(env)
 global.__basedir = __dirname;
 
+const path = require('path');
+const csv = require('csv-parser');
 const fs = require('fs');
 const express = require('express');
-const path = require('path');
+const history = require('connect-history-api-fallback');
 const bodyParser = require('body-parser');
 const http = require('http');
+const axios = require('axios');
 const cors = require('cors');
-const axios = require("axios");
+const assert = require('assert').strict;
 const glob = require("glob");
-axios.defaults.baseURL = process.env.URL_SERVER;
 
-const router = express.Router();
-
+// express setup
 const app = express();
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
 
-let db = null;
-let collection_users = null;
-
-// -> routes
-router.get("/alive", function (req, res, next) {
-  res.send("ok");
-});
-
-router.get("/project", function (req, res, next) {
-  let project_dir = req.query.project_dir;
-  //let search_dir = path.join(__dirname, "/static/**/",project_dir, "/*");
-  //let symlinks = [ path.join(__dirname, "/static/rohan") ];
-  let search_dir = "./static/*/" + project_dir + "/*";
-
-  let options = { follow: true };
+// routes
+app.get("/api/project", function (req, res, next) {
+  const { project_dir } = req.query;
+  const search_dir = project_dir + "/*";
+  const options = { };
   glob(search_dir, options, function (err, experiments) {
     if (err)
       return res.send(err);
-    let timestamps = experiments.map(x => {
-      try {
-        let meta_path = x + "/metadata.json";
-        let meta = JSON.parse(fs.readFileSync(meta_path));
-        return meta["timestamp"];
-      } catch(e) {
-        return "-";
-      }
+    experiments = experiments.map(x => ({id: path.basename(x)}));
+    res.send(experiments);
+  });
+
+});
+
+app.get("/api/experiment", function (req, res, next) {
+  let { project_dir, experiment } = req.query;
+  experiment = JSON.parse(experiment);
+  const search_dir = project_dir + "/" + experiment.id + "/log/version_*";
+  console.log(search_dir);
+  const options = { };
+  glob(search_dir, options, function (err, outputs) {
+    if (err)
+      return res.send(err);
+    outputs = outputs.sort(function(a, b) {
+      a = path.basename(a);
+      b = path.basename(b);
+      return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
     });
-    let experiments_clean = experiments.map(x => path.basename(x));
 
-    let ret = [];
-    for (let i in experiments)
-      ret.push({ id: experiments_clean[i], path: experiments[i], timestamp: timestamps[i] });
+    const log_dir = outputs.pop();
+    const csv_filename = `${log_dir}/metrics.csv`;
+    if (!fs.existsSync(csv_filename)) {
+      res.status(500).send();
+      return;
+    }
 
-    res.send(ret);
+    const rows = [];
+    fs.createReadStream(csv_filename)
+      .pipe(csv())
+      .on('data', (data) => rows.push(data))
+      .on('end', () => {
+        console.log(rows);
+      });
+    res.send(rows);
   });
 });
 
-router.get("/experiment", function (req, res, next) {
-  let experiment_dir = req.query.path
-
-  let log_path = experiment_dir + "/log_eval.json"
-  try {
-    let log = JSON.parse(fs.readFileSync(log_path));
-    glob(experiment_dir + "/**/*", function (err, files) {
-      const is_dir = source => fs.lstatSync(source).isDirectory();
-      files = files.filter(is_dir);
-      //files = files.map(x => path.join("/", path.dirname(x).split("/").slice(2).join()));
-      files = files.map( x => {
-        x = x.substring(x.indexOf('/') + 1);
-        return x.substring(x.indexOf('/'));
-      });
-      let ret = { "log": log, "dirs": files };
-      res.send(ret);
-    });
-  } catch(e) {
-    return res.status(500).send(e);
-  }
+app.get("/api/download", function (req, res, next) {
+  const { project_dir, experiment_name, output_name, out } = req.query;
+  const out_filename = `${project_dir}/${experiment_name}/${output_name}/${out}.json`;
+  res.sendFile(out_filename);
 });
 
-// <--
+// timeout helper function
+const timeout = function(s) {
+  return new Promise(resolve => setTimeout(resolve, s*1000));
+}
 
-app.use("/", router);
+// vue client static
+const middleware_static = express.static('../client/dist');
+app.use(middleware_static);
+app.use(history({ }));
+app.use(middleware_static);
 
 
-
-const hostname = process.env.HOSTNAME_SERVER;
-const port = process.env.PORT_SERVER;
-const url = process.env.URL_SERVER;
-const server_handle = http.createServer(app);
-
-
-server_handle.listen({"port" : port, "host" : hostname}, () => {
+// start server
+assert.ok(process.env.HOSTNAME);
+assert.ok(process.env.PORT);
+assert.ok(process.env.URL);
+let server = http.createServer(app);
+server.listen({"port" : process.env.PORT, host: process.env.HOSTNAME}, () => {
   app.emit( "app_started" )
-  console.log(`Server running at ${url}`);
+  console.log(`Server running at ${process.env.URL}`);
 });
 
-module.exports = server_handle;

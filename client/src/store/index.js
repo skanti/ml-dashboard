@@ -1,26 +1,37 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
-import createPersistedState from "vuex-persistedstate";
+// persistent variables, rest is not saved in local storage
+import { createStore } from 'vuex'
+import createPersistedState from 'vuex-persistedstate';
 
-const dataState = createPersistedState({
-  paths: ['project_dir']
+const persisted_state = createPersistedState({ });
+// for specific variables add: paths: [ 'project_dir', 'experiment_name', 'output_name' ]
+
+const store = createStore({
+  plugins: [persisted_state],
+  state: {
+    project_dir: '',
+    experiment_name: '',
+    output_name: '',
+    settings: {
+      camera_up: 'z',
+      video_mode: false,
+    }
+  },
+  mutations: {
+    project_dir(state, project_dir) {
+      state.project_dir = project_dir;
+    },
+    experiment_name(state, experiment_name) {
+      state.experiment_name = experiment_name;
+    },
+    output_name(state, output_name) {
+      state.output_name = output_name;
+    },
+    settings(state, settings) {
+      state.settings = Object.assign({}, state.settings, settings);
+    },
+  },
+  actions: {
+  }
 })
 
-Vue.use(Vuex)
-
-export default new Vuex.Store({
-  plugins: [dataState],
-  state: {
-    project_dir: "",
-    dummy: 0,
-  },
-	mutations: {
-    project_dir(state, project_dir) {
-      state.project_dir = project_dir
-    },
-    dummy_increment(state) {
-			state.dummy += 1
-		},
-	}
-});
-
+export default store;

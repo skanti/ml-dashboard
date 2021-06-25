@@ -145,12 +145,12 @@ export default {
         }
 
         // group
-        const metrics = lodash.keys(plot_data[0]);
+        const metrics = lodash(plot_data[0]).omit(["step", "epoch", "stage"]).keys().value();
         for (let metric of metrics) {
-          const y_train = lodash(plot_data).filter({stage: 0}).groupBy(metric).map((v,k) => k).value()
-          const x_train = lodash(plot_data).filter({stage: 0}).groupBy("step").map((v,k) => k).value()
-          const y_val = lodash(plot_data).filter({stage: 1}).groupBy(metric).map((v,k) => k).value()
-          const x_val = lodash(plot_data).filter({stage: 1}).groupBy("step").map((v,k) => k).value()
+          const y_train = lodash(plot_data).filter({stage: 0}).groupBy(metric).keys().value()
+          const x_train = lodash(plot_data).filter({stage: 0}).groupBy("step").keys().value()
+          const y_val = lodash(plot_data).filter({stage: 1}).groupBy(metric).keys().value()
+          const x_val = lodash(plot_data).filter({stage: 1}).groupBy("step").keys().value()
           charts[metric] = { name: id, train: { y: y_train, x: x_train }, val: { y: y_val, x: x_val}, color: color};
         }
         //this.counter += 1;

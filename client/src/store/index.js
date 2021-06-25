@@ -9,23 +9,13 @@ const store = createStore({
   plugins: [persisted_state],
   state: {
     project_dir: '',
-    experiment_name: '',
-    output_name: '',
     settings: {
-      camera_up: 'z',
-      video_mode: false,
+      smoothing_value: 0.5,
+      smoothing_toggle: false,
+      show_val: true,
     }
   },
   mutations: {
-    project_dir(state, project_dir) {
-      state.project_dir = project_dir;
-    },
-    experiment_name(state, experiment_name) {
-      state.experiment_name = experiment_name;
-    },
-    output_name(state, output_name) {
-      state.output_name = output_name;
-    },
     settings(state, settings) {
       state.settings = Object.assign({}, state.settings, settings);
     },

@@ -72,7 +72,18 @@
     <!-- table -->
 
     <div class="col-12 col-sm-9">
-      <div class="q-pb-md q-gutter-md">
+      <div class="row q-pb-md q-gutter-md">
+        <q-input class="" v-model="settings.smoothing_value" label="Smoothing" maxlength="10" style="max-width:150px"
+          @update:model-value="v => onchange_settings({smoothing_value: v})" @debounce="300" outlined dense >
+          <template v-slot:append>
+            <q-toggle v-model="settings.smoothing_toggle" color="blue-5"
+              @update:model-value="v => onchange_settings({smoothing_toggle: v})" keep-color />
+          </template>
+        </q-input>
+        <q-field outlined dense>
+          <q-toggle label="Show val" v-model="settings.show_val" color="blue-5"
+            @update:model-value="v => onchange_settings({show_val: v})" />
+        </q-field>
       </div>
       <div class="row q-col-gutter-md" >
         <div :class="'col-12 col-sm-' + card_size" v-for="[k,v] in Object.entries(charts)"
@@ -92,7 +103,7 @@
 <script>
 
 import axios from 'axios';
-//import { mapState } from 'vuex'
+import { mapState } from 'vuex'
 import Chart from "@/components/Chart";
 import { copyToClipboard } from 'quasar'
 import lodash from 'lodash';
@@ -127,7 +138,7 @@ export default {
     this.auto_refresh();
   },
   computed: {
-    //...mapState([ "project_dir" ])
+    ...mapState([ "settings" ]),
     project_dir: {
       get () {
         return this.$store.state.project_dir;
@@ -138,6 +149,21 @@ export default {
     },
   },
   methods: {
+    onchange_settings(v) {
+      this.$store.commit("settings", v);
+      this.build_charts();
+    },
+    linear_smooth(scalars, weight) {  // Weight between 0 and 1
+      let last = scalars[0]  // First value in the plot (first timestep)
+      let smoothed = []
+      for (let i in scalars) {
+        let point = scalars[i];
+        let smoothed_val = last*weight + (1 - weight)*point  // Calculate smoothed value
+        smoothed.push(smoothed_val)
+        last = smoothed_val // Anchor the last smoothed value
+      }
+      return smoothed
+    },
     build_charts() {
       let charts = {};
       for (let id of Array.from(this.selected)) {
@@ -147,17 +173,20 @@ export default {
           continue;
         }
         // group
-        const grouper_fn = function(res, item, name){  
-          res[item.type] = res[item.type] || {}; 
+        const grouper_fn = function(res, item, name) {
+          res[item.type] = res[item.type] || {};
           res[item.type][name] = item;
         };
         const metrics = lodash(plot_data[0]).omit(["step", "epoch", "stage"]).keys().value();
         for (let metric of metrics) {
-          const y_train = lodash(plot_data).filter({stage: 0}).map(x => x[metric]).value()
+          // smooth train curve
+          let y_train = lodash(plot_data).filter({stage: 0}).map(x => x[metric]).value()
+          let s = this.settings.smoothing_toggle ? this.settings.smoothing_value: 0.0;
+          y_train = this.linear_smooth(y_train, s);
           const x_train = lodash(plot_data).filter({stage: 0}).map(x => x["step"]).value()
           const y_val = lodash(plot_data).filter({stage: 1}).map(x => x[metric]).value()
           const x_val = lodash(plot_data).filter({stage: 1}).map(x => x["step"]).value()
-          const chart = { experiment_id: id, metric: metric,
+          const chart = { experiment_id: id, metric: metric, visible: this.settings.show_val,
             train: { y: y_train, x: x_train }, val: { y: y_val, x: x_val}, color: color};
 
           charts[metric] = charts[metric] || [];
@@ -210,9 +239,11 @@ export default {
       for (let row of this.experiments) {
         let id = row.id;
         if (this.selected.has(id)) {
-          const res = await axios.get("/api/experiment", { params: { project_dir: this.project_dir, experiment: row }});
-          let color_old = this.data[id].color;
-          this.data[id] = { rows: res.data, color: color_old };
+          try {
+            const res = await axios.get("/api/experiment", { params: { project_dir: this.project_dir, experiment: row }});
+            let color_old = this.data[id].color;
+            this.data[id] = { rows: res.data, color: color_old };
+          } catch(err) { }
         }
       }
       this.loading = false;

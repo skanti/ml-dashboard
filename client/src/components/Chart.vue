@@ -19,7 +19,9 @@ export default {
 
       let plots = [];
       for (const experiment of this.data) {
-        let experiment_id = experiment["experiment_id"];
+        const experiment_id = experiment["experiment_id"];
+        const visible = experiment["visible"];
+        console.log(visible);
         let data_val = {
           x: experiment["val"]["x"],
           y: experiment["val"]["y"],
@@ -27,6 +29,7 @@ export default {
             color: experiment["color"]
           },
           name: experiment_id,
+          visible: visible,
           showlegend: true,
           mode: 'lines'
         };
@@ -39,7 +42,7 @@ export default {
           name: experiment_id,
           showlegend: false,
           mode: 'lines',
-          line: { dash: 'dash' }
+          line: { dash: 'dash', 'shape': 'spline' },
         };
         plots.push(data_val);
         plots.push(data_train);

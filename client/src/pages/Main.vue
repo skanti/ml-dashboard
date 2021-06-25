@@ -14,7 +14,7 @@
       </div>
       <div class="col-3 col-sm-3 q-gutter-sm">
         <q-btn @click="click_search_experiments" label="Checkout" color="blue-5" icon="expand_more" :disable='project_dir == ""' unelevated/>
-        <q-btn label="Refresh" icon="update" color="orange-5" @click="click_refresh" unelevated />
+        <q-btn label="Refresh" icon="update" color="green-5" @click="click_refresh" unelevated />
         <q-circular-progress :value="parseInt(100*timer.value/timer.max)" size="md" color="orange-5" :max="100.0" show-value />
       </div>
     </div>

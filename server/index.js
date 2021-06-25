@@ -30,7 +30,7 @@ app.get("/api/project", function (req, res, next) {
       return res.send(err);
     experiments = experiments.map(x => {
       const stats = fs.statSync(x);
-      return { id: path.basename(x), timestamp: stats.mtime };
+      return { id: path.basename(x), timestamp: stats.birthtime };
       });
     res.send(experiments);
   });

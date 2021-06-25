@@ -137,8 +137,8 @@ export default {
       }
     },
   },
-  watch: {
-    selected(value_new, value_old) {
+  methods: {
+    build_charts() {
       let charts = {};
       for (let id of Array.from(this.selected)) {
         const plot_data = this.data[id]["rows"];
@@ -146,7 +146,6 @@ export default {
         if (plot_data == undefined) {
           continue;
         }
-
         // group
         const grouper_fn = function(res, item, name){  
           res[item.type] = res[item.type] || {}; 
@@ -167,9 +166,7 @@ export default {
       }
       this.counter += 1;
       this.charts = charts;
-    }
-  },
-  methods: {
+    },
     click_search_experiments: function() {
       this.loading = true;
       let query = { project_dir: this.project_dir };
@@ -203,6 +200,7 @@ export default {
       }
       this.selected = selected;
       this.loading = false;
+      this.build_charts();
     },
     click_refresh: async function() {
       if (this.project_dir == "")
@@ -217,8 +215,8 @@ export default {
           this.data[id] = { rows: res.data, color: color_old };
         }
       }
-      this.counter += 1;
       this.loading = false;
+      this.build_charts();
     },
     auto_refresh: function() {
       let timer = setInterval(() => {

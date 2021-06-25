@@ -12,8 +12,10 @@
           </template>
         </q-input>
       </div>
-      <div class="col-3 col-sm-1">
-        <q-btn @click="click_search_experiments" label="Checkout" color="blue-5" icon="expand_more" :disable='project_dir == ""'/>
+      <div class="col-3 col-sm-3 q-gutter-sm">
+        <q-btn @click="click_search_experiments" label="Checkout" color="blue-5" icon="expand_more" :disable='project_dir == ""' unelevated/>
+        <q-btn label="Refresh" icon="update" color="orange-5" @click="click_refresh" unelevated />
+        <q-circular-progress :value="parseInt(100*timer.value/timer.max)" size="md" color="orange-5" :max="100.0" show-value />
       </div>
     </div>
   </div>
@@ -71,8 +73,6 @@
 
     <div class="col-12 col-sm-9">
       <div class="q-pb-md q-gutter-md">
-        <q-btn label="Refresh" icon="update" color="orange-5" @click="click_refresh" />
-        <q-circular-progress :value="parseInt(100*timer.value/timer.max)" size="md" color="orange-5" :max="100.0" show-value />
       </div>
       <div class="row q-col-gutter-md" >
         <div :class="'col-12 col-sm-' + card_size" v-for="[k,v] in Object.entries(charts)"
@@ -95,8 +95,7 @@ import axios from 'axios';
 //import { mapState } from 'vuex'
 import Chart from "@/components/Chart";
 import { copyToClipboard } from 'quasar'
-
-
+import lodash from 'lodash';
 
 export default {
   name: 'App',
@@ -139,42 +138,23 @@ export default {
     charts: function() {
       let charts = {};
       for (let id of Array.from(this.selected)) {
-        const plot_data = this.data[id];
-        if (plot_data == undefined)
+        const plot_data = this.data[id]["rows"];
+        const color = this.data[id]["color"];
+        if (plot_data == undefined) {
           continue;
-          console.log(plot_data);
-          return 0;
-
-        let x = []
-        let y_train = {};
-        let y_val = {};
-
-        let logs = plot_data.log;
-        for (let log of Object.values(logs)) {
-          let train = log.loss.train;
-          for (let [stats_name,stats_val] of Object.entries(train)) {
-            y_train[stats_name] = y_train[stats_name] || [];
-            y_train[stats_name].push(stats_val);
-          }
-          let val = log.loss.val;
-          for (let [stats_name,stats_val] of Object.entries(val)) {
-            y_val[stats_name] = y_val[stats_name] || [];
-            y_val[stats_name].push(stats_val);
-          }
-          x.push(log.iteration);
         }
 
-        for (let stats_name in y_val) {
-          charts[stats_name] = charts[stats_name] || {};
-          charts[stats_name][id] = charts[stats_name][id] || {};
-
-          charts[stats_name][id]["y_train"] = y_train[stats_name];
-          charts[stats_name][id]["y_val"] = y_val[stats_name];
-          charts[stats_name][id]["x"] = x;
-          charts[stats_name][id]["color"] = plot_data.color;
+        // group
+        const metrics = lodash.keys(plot_data[0]);
+        for (let metric of metrics) {
+          const y_train = lodash(plot_data).filter({stage: 0}).groupBy(metric).map((v,k) => k).value()
+          const x_train = lodash(plot_data).filter({stage: 0}).groupBy("step").map((v,k) => k).value()
+          const y_val = lodash(plot_data).filter({stage: 1}).groupBy(metric).map((v,k) => k).value()
+          const x_val = lodash(plot_data).filter({stage: 1}).groupBy("step").map((v,k) => k).value()
+          charts[metric] = { name: id, train: { y: y_train, x: x_train }, val: { y: y_val, x: x_val}, color: color};
         }
+        //this.counter += 1;
       }
-      //this.counter += 1;
       return charts;
     },
   },
@@ -204,8 +184,7 @@ export default {
       } else {
         try {
           const res = await axios.get("/api/experiment", { params: { project_dir: this.project_dir, experiment: row }});
-          this.data[id] = res.data;
-          this.data[id]["color"] = this.random_color();
+          this.data[id] = { rows: res.data, color: this.random_color() };
           selected.add(id);
         } catch (e) {
           this.$q.notify({ message: 'Failed to load experiment', icon: 'error', color: "red-5" });
@@ -222,10 +201,9 @@ export default {
       for (let row of this.experiments) {
         let id = row.id;
         if (this.selected.has(id)) {
-          let res = await axios.get(process.env.VUE_APP_URL_SERVER + "/experiment", { params: row });
-          let data_old = this.data[id];
-          this.data[id] = res.data;
-          this.data[id].color = data_old.color;
+          const res = await axios.get("/api/experiment", { params: { project_dir: this.project_dir, experiment: row }});
+          let color_old = this.data[id].color;
+          this.data[id] = { rows: res.data, color: color_old };
         }
       }
       this.counter += 1;

@@ -3,7 +3,7 @@ require('dotenv-expand')(env)
 global.__basedir = __dirname;
 
 const path = require('path');
-const csv = require('csv-parser');
+const csv = require('csv-parse')
 const fs = require('fs');
 const express = require('express');
 const history = require('connect-history-api-fallback');
@@ -45,22 +45,28 @@ app.get("/api/experiment", function (req, res, next) {
   glob(search_dir, options, function (err, outputs) {
     if (err)
       return res.send(err);
+    // sort versions
     outputs = outputs.sort(function(a, b) {
       a = path.basename(a);
       b = path.basename(b);
       return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
     });
 
+    // pick last
     const log_dir = outputs.pop();
+
+    // check csv file
     const csv_filename = `${log_dir}/metrics.csv`;
     if (!fs.existsSync(csv_filename)) {
       res.status(500).send();
       return;
     }
 
+    // load and parse csv
+    const parser = csv({cast: true, columns: true});
     const rows = [];
     fs.createReadStream(csv_filename)
-      .pipe(csv())
+      .pipe(parser)
       .on('data', (data) => rows.push(data))
       .on('end', () => {
         res.send(rows);

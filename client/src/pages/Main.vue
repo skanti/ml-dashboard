@@ -148,12 +148,16 @@ export default {
         }
 
         // group
+        const grouper_fn = function(res, item, name){  
+          res[item.type] = res[item.type] || {}; 
+          res[item.type][name] = item;
+        };
         const metrics = lodash(plot_data[0]).omit(["step", "epoch", "stage"]).keys().value();
         for (let metric of metrics) {
-          const y_train = lodash(plot_data).filter({stage: 0}).groupBy(metric).keys().value()
-          const x_train = lodash(plot_data).filter({stage: 0}).groupBy("step").keys().value()
-          const y_val = lodash(plot_data).filter({stage: 1}).groupBy(metric).keys().value()
-          const x_val = lodash(plot_data).filter({stage: 1}).groupBy("step").keys().value()
+          const y_train = lodash(plot_data).filter({stage: 0}).map(x => x[metric]).value()
+          const x_train = lodash(plot_data).filter({stage: 0}).map(x => x["step"]).value()
+          const y_val = lodash(plot_data).filter({stage: 1}).map(x => x[metric]).value()
+          const x_val = lodash(plot_data).filter({stage: 1}).map(x => x["step"]).value()
           const chart = { experiment_id: id, metric: metric,
             train: { y: y_train, x: x_train }, val: { y: y_val, x: x_val}, color: color};
 

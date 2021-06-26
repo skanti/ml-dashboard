@@ -68,7 +68,8 @@ export default {
           rangemode: "tozero",
         },
         showlegend : true,
-        legend : { x : 0, y : 1, orientation : "v", font : {size : 10}},
+        legend : { x : 0, y : 1, orientation : "v", font : {size : 10},
+          bgcolor: 'rgba(255, 255, 255, 0.5)'},
       }
 
       return layout;

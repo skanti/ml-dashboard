@@ -21,7 +21,6 @@ export default {
       for (const experiment of this.data) {
         const experiment_id = experiment["experiment_id"];
         const visible = experiment["visible"];
-        console.log(visible);
         let data_val = {
           x: experiment["val"]["x"],
           y: experiment["val"]["y"],
@@ -39,8 +38,8 @@ export default {
           marker: {
             color: experiment["color"]
           },
-          name: experiment_id,
-          showlegend: false,
+          name: experiment_id + " (train)",
+          showlegend: !visible,
           mode: 'lines',
           line: { dash: 'dash', 'shape': 'spline' },
         };

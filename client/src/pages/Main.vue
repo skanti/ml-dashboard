@@ -9,13 +9,9 @@
           </template>
           <template v-slot:append>
             <q-icon name="close" @click="project_dir = ''" class="cursor-pointer"/>
+            <q-btn @click="click_search_experiments" label="Checkout" color="blue-5" icon="login" :disable='project_dir == ""' unelevated dense/>
           </template>
         </q-input>
-      </div>
-      <div class="col-3 col-sm-3 q-gutter-sm">
-        <q-btn @click="click_search_experiments" label="Checkout" color="blue-5" icon="expand_more" :disable='project_dir == ""' unelevated/>
-        <q-btn label="Refresh" icon="update" color="green-5" @click="click_refresh" unelevated />
-        <q-circular-progress :value="parseInt(100*timer.value/timer.max)" size="md" color="orange-5" :max="100.0" show-value />
       </div>
     </div>
   </div>
@@ -72,7 +68,12 @@
     <!-- table -->
 
     <div class="col-12 col-sm-9">
-      <div class="row q-pb-md q-gutter-md">
+      <div class="row items-center q-pb-md q-gutter-md">
+        <q-btn color="green-5" @click="click_refresh" unelevated dense no-caps>
+          <q-icon name="update" label='hoi'/>
+          <div class="q-mx-sm"> Refresh</div>
+          <q-circular-progress :value="parseInt(100*timer.value/timer.max)" size="md" color="orange-5" :max="100.0" show-value />
+        </q-btn>
         <q-input class="" v-model="settings.smoothing_value" label="Smoothing" maxlength="10" style="max-width:150px"
           @update:model-value="v => onchange_settings({smoothing_value: v})" @debounce="300" outlined dense >
           <template v-slot:append>
@@ -81,8 +82,10 @@
           </template>
         </q-input>
         <q-field outlined dense>
-          <q-toggle label="Show val" v-model="settings.show_val" color="blue-5"
-            @update:model-value="v => onchange_settings({show_val: v})" />
+          <template v-slot:control>
+            <q-toggle label="Show val" v-model="settings.show_val" color="blue-5"
+              @update:model-value="v => onchange_settings({show_val: v})" dense />
+          </template>
         </q-field>
       </div>
       <div class="row q-col-gutter-md" >

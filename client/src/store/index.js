@@ -19,6 +19,9 @@ const store = createStore({
     settings(state, settings) {
       state.settings = Object.assign({}, state.settings, settings);
     },
+    project_dir(state, project_dir) {
+      state.project_dir = project_dir;
+    }
   },
   actions: {
   }

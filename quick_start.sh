@@ -3,6 +3,7 @@
 # work dir
 work_dir=$(realpath .)
 
+export https_proxy=http://fwdproxy:8080
 
 # npm version
 version=$(node --version)

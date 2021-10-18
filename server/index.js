@@ -93,12 +93,12 @@ app.use(middleware_static);
 
 
 // start server
-assert.ok(process.env.HOSTNAME);
-assert.ok(process.env.PORT);
-assert.ok(process.env.URL);
+assert.ok(process.env.SERVER_HOSTNAME);
+assert.ok(process.env.SERVER_PORT);
+assert.ok(process.env.SERVER_URL);
 let server = http.createServer(app);
-server.listen({"port" : process.env.PORT, host: process.env.HOSTNAME}, () => {
+server.listen({"port" : process.env.SERVER_PORT, host: process.env.SERVER_HOSTNAME}, () => {
   app.emit( "app_started" )
-  console.log(`Server running at ${process.env.URL}`);
+  console.log(`Server running at ${process.env.SERVER_URL}`);
 });
 

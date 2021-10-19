@@ -13,6 +13,7 @@ const axios = require('axios');
 const cors = require('cors');
 const assert = require('assert').strict;
 const glob = require("glob");
+const { spawnSync } = require('child_process');
 
 // express setup
 const app = express();
@@ -54,10 +55,12 @@ app.get("/api/experiment", function (req, res, next) {
 
     // pick last
     const log_dir = outputs.pop();
+    // HACK: needed to avoid loading from cache (eg.g. mounted S3 bucket)
+    spawnSync('ls', [log_dir]);
 
     // check csv file
-    const csv_filename = `${log_dir}/metrics.csv`;
-    if (!fs.existsSync(csv_filename)) {
+    const csv_path = `${log_dir}/metrics.csv`;
+    if (!fs.existsSync(csv_path)) {
       res.status(500).send();
       return;
     }
@@ -65,7 +68,7 @@ app.get("/api/experiment", function (req, res, next) {
     // load and parse csv
     const parser = csv({cast: true, columns: true});
     const rows = [];
-    fs.createReadStream(csv_filename)
+    fs.createReadStream(csv_path)
       .pipe(parser)
       .on('data', (data) => rows.push(data))
       .on('end', () => {

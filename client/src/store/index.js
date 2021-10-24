@@ -1,6 +1,7 @@
 // persistent variables, rest is not saved in local storage
 import { createStore } from 'vuex'
 import createPersistedState from 'vuex-persistedstate';
+import { getField, updateField } from 'vuex-map-fields';
 
 const persisted_state = createPersistedState({ });
 // for specific variables add: paths: [ 'project_dir', 'experiment_name', 'output_name' ]
@@ -15,12 +16,13 @@ const store = createStore({
       show_val: true,
     }
   },
+  getters: {
+    getField
+  },
   mutations: {
+    updateField,
     settings(state, settings) {
       state.settings = Object.assign({}, state.settings, settings);
-    },
-    project_dir(state, project_dir) {
-      state.project_dir = project_dir;
     }
   },
   actions: {

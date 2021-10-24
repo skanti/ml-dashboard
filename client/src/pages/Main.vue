@@ -1,15 +1,16 @@
 <template>
   <!-- search bar -->
-  <div class="row q-pa-md" id="div_menu_bar">
-    <div class="row items-center q-col-gutter-md" style="width:100%">
-      <div class="col-9 col-sm-6">
-        <q-input class="q-pa-none" v-model="project_dir" label="Project Directory" outlined bottom-slots>
+  <div class='row q-pa-md' id='div_menu_bar'>
+    <div class='row items-center q-col-gutter-md' style='width:100%'>
+      <div class='col-9 col-sm-6'>
+        <q-input class='q-pa-none' v-model='project_dir' label='Project Directory' outlined bottom-slots>
           <template v-slot:prepend>
-            <q-icon name="folder"/>
+            <q-icon name='fas fa-folder'/>
           </template>
           <template v-slot:append>
-            <q-icon name="close" @click="project_dir = ''" class="cursor-pointer"/>
-            <q-btn @click="click_search_experiments" label="Checkout" color="blue-5" icon="login" :disable='project_dir == ""' unelevated dense/>
+            <q-icon name='fas fa-times' @click='project_dir = ""' class='cursor-pointer'/>
+            <q-btn @click='click_search_experiments' label='Checkout'
+              color='blue-5' icon='fas fa-sign-in-alt' :disable='project_dir == ""' unelevated dense/>
           </template>
         </q-input>
       </div>
@@ -18,18 +19,18 @@
   <!-- search bar -->
 
   <!-- table -->
-  <div class="row q-pa-md q-col-gutter-lg">
-    <div class="col-12 col-sm-3">
-      <q-card color="blue-5">
-        <q-table ref="my_table" tabindex="0" title="Experiments" :rows="experiments" :loading="loading"
-          :columns="columns" :pagination="pagination" row-key="id" :filter="filter" @row-click="click_experiment">
+  <div class='row q-pa-md q-col-gutter-lg'>
+    <div class='col-12 col-sm-3'>
+      <q-card color='blue-5'>
+        <q-table ref='my_table' tabindex='0' title='Experiments' :rows='experiments' :loading='loading'
+          :columns='columns' :pagination='pagination' row-key='id' :filter='filter' @row-click='click_experiment'>
           <!-- header -->
           <template v-slot:top>
-            <q-card class="fit" flat>
+            <q-card class='fit' flat>
               <q-card-section>
-                <q-input dense debounce="300" v-model="filter" placeholder="Fuzzy Search">
+                <q-input dense debounce='300' v-model='filter' placeholder='Fuzzy Search'>
                   <template v-slot:append>
-                    <q-icon name="search" />
+                    <q-icon name='fas fa-search' />
                   </template>
                 </q-input>
               </q-card-section>
@@ -38,23 +39,23 @@
           <!-- header -->
 
           <!-- body -->
-          <template v-slot:body="props">
-            <q-tr class="cursor-pointer" :class="selected.has(props.row.id) ? 'bg-blue-3' : 'bg-grey-1'"
-              :props="props" @click="click_experiment(props.row)">
-              <q-td key="color" :props="props" >
-                <q-avatar v-if="data[props.row.id] && selected.has(props.row.id)" size="sm"
-                  icon="palette" :style="'background-color: white; color:' + data[props.row.id].color"
-                  font-size="16px" />
+          <template v-slot:body='props'>
+            <q-tr class='cursor-pointer' :class='selected.has(props.row.id) ? "bg-blue-3" : "bg-grey-1"'
+              :props='props' @click='click_experiment(props.row)'>
+              <q-td key='color' :props='props' >
+                <q-avatar v-if='data[props.row.id] && selected.has(props.row.id)' size='sm'
+                  icon='fas fa-palette' :style='"background-color: white; color:" + data[props.row.id].color'
+                  font-size='16px' />
               </q-td>
-              <q-td  key="id" :props="props">
-                <q-btn color="dark" class="text-bold" size="sm"
-                  @click="e => click_copy_to_clipboard(e, props.row.id)" flat dense no-caps>
-                  <div class="ellipsis"> {{ props.row.id }} </div>
+              <q-td  key='id' :props='props'>
+                <q-btn color='dark' class='text-bold' size='sm'
+                  @click='e => click_copy_to_clipboard(e, props.row.id)' flat dense no-caps>
+                  <div class='ellipsis'> {{ props.row.id }} </div>
                   <q-tooltip> Copy to clipboard </q-tooltip>
                 </q-btn>
               </q-td>
-              <q-td key="timestamp" :props="props" >
-                <q-btn size="sm" icon="schedule" dense flat>
+              <q-td key='timestamp' :props='props' >
+                <q-btn size='sm' icon='far fa-clock' dense flat>
                   <q-tooltip> {{ props.row.timestamp }} </q-tooltip>
                 </q-btn>
               </q-td>
@@ -67,33 +68,33 @@
     </div>
     <!-- table -->
 
-    <div class="col-12 col-sm-9">
-      <div class="row items-center q-pb-md q-gutter-md">
-        <q-btn color="green-5" @click="click_refresh" unelevated dense no-caps>
-          <q-icon name="update" label='hoi'/>
-          <div class="q-mx-sm"> Refresh</div>
-          <q-circular-progress :value="parseInt(100*timer.value/timer.max)" size="md" color="orange-5" :max="100.0" show-value />
+    <div class='col-12 col-sm-9'>
+      <div class='row items-center q-pb-md q-gutter-md'>
+        <q-btn color='green-5' @click='click_refresh' unelevated dense no-caps>
+          <q-icon name='fas fa-sync-alt' label='hoi'/>
+          <div class='q-mx-sm'> Refresh</div>
+          <q-circular-progress :value='parseInt(100*timer.value/timer.max)' size='md' color='orange-5' :max='100.0' show-value />
         </q-btn>
-        <q-input class="" v-model="settings.smoothing_value" label="Smoothing" maxlength="10" style="max-width:150px"
-          @update:model-value="v => onchange_settings({smoothing_value: v})" @debounce="300" outlined dense >
+        <q-input class='' v-model='settings.smoothing_value' label='Smoothing' maxlength='10' style='max-width:150px'
+          @update:model-value='v => onchange_settings({smoothing_value: v})' @debounce='300' outlined dense >
           <template v-slot:append>
-            <q-toggle v-model="settings.smoothing_toggle" color="blue-5"
-              @update:model-value="v => onchange_settings({smoothing_toggle: v})" keep-color />
+            <q-toggle v-model='settings.smoothing_toggle' color='blue-5'
+              @update:model-value='v => onchange_settings({smoothing_toggle: v})' keep-color />
           </template>
         </q-input>
         <q-field outlined dense>
           <template v-slot:control>
-            <q-toggle label="Show val" v-model="settings.show_val" color="blue-5"
-              @update:model-value="v => onchange_settings({show_val: v})" dense />
+            <q-toggle label='Show val' v-model='settings.show_val' color='blue-5'
+              @update:model-value='v => onchange_settings({show_val: v})' dense />
           </template>
         </q-field>
       </div>
-      <div class="row q-col-gutter-md" >
-        <div :class="'col-12 col-sm-' + card_size" v-for="[k,v] in Object.entries(charts)"
-          :key="'root_plot' + k + '_idx' + counter">
-          <q-card class="bg-grey-1">
-            <q-responsive :ratio="1">
-              <Chart :metric="k" :data="v"> </Chart>
+      <div class='row q-col-gutter-md' >
+        <div :class='"col-12 col-sm-" + card_size' v-for='[k,v] in Object.entries(charts)'
+          :key='"root_plot" + k + "_idx" + counter'>
+          <q-card class='bg-grey-1'>
+            <q-responsive :ratio='1'>
+              <Chart :metric='k' :data='v'> </Chart>
             </q-responsive>
           </q-card>
         </div>
@@ -107,7 +108,8 @@
 
 import axios from 'axios';
 import { mapState } from 'vuex'
-import Chart from "@/components/Chart";
+import { mapFields } from 'vuex-map-fields';
+import Chart from '@/components/Chart';
 import { copyToClipboard } from 'quasar'
 import lodash from 'lodash';
 
@@ -127,7 +129,7 @@ export default {
         max: 30, // <- in seconds
       },
       card_size: 4,
-      filter: "",
+      filter: '',
       pagination: { sortBy: 'timestamp', descending: true, page: 1, rowsPerPage: 50 },
       columns: [
         { name: 'color', align: 'left', label: 'Color', field: 'color' },
@@ -141,19 +143,12 @@ export default {
     this.auto_refresh();
   },
   computed: {
-    ...mapState([ "settings" ]),
-    project_dir: {
-      get () {
-        return this.$store.state.project_dir;
-      },
-      set (v) {
-        this.$store.commit("project_dir", v);
-      }
-    },
+    ...mapState(['settings']),
+    ...mapFields(['project_dir']),
   },
   methods: {
     onchange_settings(v) {
-      this.$store.commit("settings", v);
+      this.$store.commit('settings', v);
       this.build_charts();
     },
     linear_smooth(scalars, weight) {  // Weight between 0 and 1
@@ -170,25 +165,21 @@ export default {
     build_charts() {
       let charts = {};
       for (let id of Array.from(this.selected)) {
-        const plot_data = this.data[id]["rows"];
-        const color = this.data[id]["color"];
+        const plot_data = this.data[id]['rows'];
+        const color = this.data[id]['color'];
         if (plot_data == undefined) {
           continue;
         }
         // group
-        const grouper_fn = function(res, item, name) {
-          res[item.type] = res[item.type] || {};
-          res[item.type][name] = item;
-        };
-        const metrics = lodash(plot_data[0]).omit(["step", "epoch", "stage"]).keys().value();
+        const metrics = lodash(plot_data[0]).omit(['step', 'epoch', 'stage']).keys().value();
         for (let metric of metrics) {
           // smooth train curve
           let y_train = lodash(plot_data).filter({stage: 0}).map(x => x[metric]).value()
           let s = this.settings.smoothing_toggle ? this.settings.smoothing_value: 0.0;
           y_train = this.linear_smooth(y_train, s);
-          const x_train = lodash(plot_data).filter({stage: 0}).map(x => x["step"]).value()
+          const x_train = lodash(plot_data).filter({stage: 0}).map(x => x['step']).value()
           const y_val = lodash(plot_data).filter({stage: 1}).map(x => x[metric]).value()
-          const x_val = lodash(plot_data).filter({stage: 1}).map(x => x["step"]).value()
+          const x_val = lodash(plot_data).filter({stage: 1}).map(x => x['step']).value()
           const chart = { experiment_id: id, metric: metric, visible: this.settings.show_val,
             train: { y: y_train, x: x_train }, val: { y: y_val, x: x_val}, color: color};
 
@@ -202,7 +193,7 @@ export default {
     click_search_experiments: function() {
       this.loading = true;
       let query = { project_dir: this.project_dir };
-      return axios.get("/api/project", { params: query }).then(res => {
+      return axios.get('/api/project', { params: query }).then(res => {
         this.experiments = res.data;
       }).finally(() => {
         this.loading = false;
@@ -223,19 +214,19 @@ export default {
         selected.delete(id);
       } else {
         try {
-          const res = await axios.get("/api/experiment", { params: { project_dir: this.project_dir, experiment: row }});
+          const res = await axios.get('/api/experiment', { params: { project_dir: this.project_dir, experiment: row }});
           this.data[id] = { rows: res.data, color: this.random_color() };
           selected.add(id);
         } catch (e) {
-          this.$q.notify({ message: 'Failed to load experiment', icon: 'error', color: "red-5" });
-        };
+          this.$q.notify({ message: 'Failed to load experiment', icon: 'error', color: 'red-5' });
+        }
       }
       this.selected = selected;
       this.loading = false;
       this.build_charts();
     },
     click_refresh: async function() {
-      if (this.project_dir == "")
+      if (this.project_dir == '')
         return;
       await this.click_search_experiments();
       this.loading = true;
@@ -243,10 +234,12 @@ export default {
         let id = row.id;
         if (this.selected.has(id)) {
           try {
-            const res = await axios.get("/api/experiment", { params: { project_dir: this.project_dir, experiment: row }});
+            const res = await axios.get('/api/experiment', { params: { project_dir: this.project_dir, experiment: row }});
             let color_old = this.data[id].color;
             this.data[id] = { rows: res.data, color: color_old };
-          } catch(err) { }
+          } catch(err) {
+            console.log(err);
+          }
         }
       }
       this.loading = false;
@@ -265,7 +258,7 @@ export default {
     },
     click_copy_to_clipboard: function(e, id) {
       copyToClipboard(id).then(() => {
-        this.$q.notify({ message: "Copied to clipboard!", icon: 'check_circle', color: "green-5" });
+        this.$q.notify({ message: 'Copied to clipboard!', icon: 'check_circle', color: 'green-5' });
       });
       e.stopPropagation();
     }
@@ -273,5 +266,5 @@ export default {
 }
 </script>
 
-<style lang="sass">
+<style lang='sass'>
 </style>

@@ -32,7 +32,7 @@ app.get("/api/project", function (req, res, next) {
     experiments = experiments.map(x => {
       const stats = fs.statSync(x);
       return { id: path.basename(x), timestamp: stats.birthtime };
-      });
+    });
     res.send(experiments);
   });
 
@@ -54,26 +54,31 @@ app.get("/api/experiment", function (req, res, next) {
     });
 
     // pick last
-    const log_dir = outputs.pop();
-    // HACK: needed to avoid loading from cache (eg.g. mounted S3 bucket)
-    spawnSync('ls', [log_dir]);
-
-    // check csv file
-    const csv_path = `${log_dir}/metrics.csv`;
-    if (!fs.existsSync(csv_path)) {
-      res.status(500).send();
-      return;
-    }
-
-    // load and parse csv
+    const jobs = [];
     const parser = csv({cast: true, columns: true});
-    const rows = [];
-    fs.createReadStream(csv_path)
-      .pipe(parser)
-      .on('data', (data) => rows.push(data))
-      .on('end', () => {
-        res.send(rows);
-      });
+    for (const log_dir of outputs) {
+      // HACK: needed to avoid loading from cache (eg.g. mounted S3 bucket)
+      spawnSync('ls', [log_dir]);
+
+      // check csv file
+      const csv_path = `${log_dir}/metrics.csv`;
+      if (!fs.existsSync(csv_path)) {
+        continue
+      }
+
+      // load and parse csv
+      const rows = []
+      jobs.push(new Promise((resolve, reject) => {
+        fs.createReadStream(csv_path)
+          .pipe(parser)
+          .on('data', row => rows.push(row))
+          .on('error', err => reject(err))
+          .on('finish', () => resolve(rows))
+      }));
+    }
+    Promise.all(jobs).then(reses => {
+      res.send(reses.flat());
+    });
   });
 });
 

@@ -112,6 +112,7 @@ import { mapFields } from 'vuex-map-fields';
 import Chart from '@/components/Chart';
 import { copyToClipboard } from 'quasar'
 import lodash from 'lodash';
+import { useQuasar } from 'quasar';
 
 export default {
   name: 'App',
@@ -137,6 +138,10 @@ export default {
         { name: 'timestamp', align: 'left', label: 'Date', field: 'timestamp', sortable: true },
       ]
     }
+  },
+  setup() {
+    const q = useQuasar();
+    return { q$: q }
   },
   created: function () {
     this.click_refresh();
@@ -165,11 +170,12 @@ export default {
     build_charts() {
       let charts = {};
       for (let id of Array.from(this.selected)) {
-        const plot_data = this.data[id]['rows'];
+        let plot_data = this.data[id]['rows'];
         const color = this.data[id]['color'];
         if (plot_data == undefined) {
           continue;
         }
+        plot_data = lodash(plot_data).uniqBy('step').value();
         // group
         const metrics = lodash(plot_data[0]).omit(['step', 'epoch', 'stage']).keys().value();
         for (let metric of metrics) {

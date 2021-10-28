@@ -3,7 +3,7 @@ require('dotenv-expand')(env)
 global.__basedir = __dirname;
 
 const path = require('path');
-const csv = require('csv-parse')
+const csv = require('csv-parse/lib/sync')
 const fs = require('fs');
 const express = require('express');
 const history = require('connect-history-api-fallback');
@@ -54,8 +54,9 @@ app.get("/api/experiment", function (req, res, next) {
     });
 
     // pick last
-    const jobs = [];
-    const parser = csv({cast: true, columns: true});
+    const data = [];
+    //const parser = csv({cast: true, columns: true});
+    let ignore_header = false;
     for (const log_dir of outputs) {
       // HACK: needed to avoid loading from cache (eg.g. mounted S3 bucket)
       spawnSync('ls', [log_dir]);
@@ -65,20 +66,13 @@ app.get("/api/experiment", function (req, res, next) {
       if (!fs.existsSync(csv_path)) {
         continue
       }
-
-      // load and parse csv
-      const rows = []
-      jobs.push(new Promise((resolve, reject) => {
-        fs.createReadStream(csv_path)
-          .pipe(parser)
-          .on('data', row => rows.push(row))
-          .on('error', err => reject(err))
-          .on('finish', () => resolve(rows))
-      }));
+      const buff = fs.readFileSync(csv_path);
+      const rows = csv(buff, {cast: true, columns: true, skipComments: ignore_header } );
+      ignore_header = true; // skip header after first log
+      data.push(rows);
     }
-    Promise.all(jobs).then(reses => {
-      res.send(reses.flat());
-    });
+    // send
+    res.send(data.flat());
   });
 });
 

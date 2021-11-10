@@ -175,7 +175,7 @@ export default {
         if (plot_data == undefined) {
           continue;
         }
-        plot_data = lodash(plot_data).uniqBy('step').value();
+        plot_data = lodash(plot_data).reverse().uniqBy('step').reverse().value();
         // group
         const metrics = lodash(plot_data[0]).omit(['step', 'epoch', 'stage']).keys().value();
         for (let metric of metrics) {

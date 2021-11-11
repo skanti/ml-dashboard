@@ -159,7 +159,7 @@ export default {
       this.build_charts();
     },
     linear_smooth(scalars, weight) {  // Weight between 0 and 1
-      let last = scalars[0]  // First value in the plot (first timestep)
+      let last = scalars[0]  // First value in the plot (first timestamp)
       let smoothed = []
       for (let i in scalars) {
         let point = scalars[i];
@@ -178,6 +178,8 @@ export default {
         if (plot_data0 == undefined) {
           continue;
         }
+        // no smoothing list
+        const no_smoothing = new Set(['timestamp']);
         // group & find metrics from header
         const [last_item] = plot_data0.slice(-1);
         const metrics = lodash(last_item).omit(['step', 'epoch', 'stage']).keys().value();
@@ -199,8 +201,9 @@ export default {
           let x_train = plot_data.filter({stage: 0}).map(x => x['step']).value()
           const mask_train = y_train.map(x => !!x);
           // smooth train curve
-          let s = this.settings.smoothing_toggle ? this.settings.smoothing_value: 0.0;
-          y_train = this.linear_smooth(y_train, s);
+          if (this.smoothing_toggle && !no_smoothing.has(metric)) {
+            y_train = this.linear_smooth(y_train, this.settings.smoothing_value);
+          }
           // val
           let y_val = plot_data.filter({stage: 1}).map(x => x[metric]).value()
           let x_val = plot_data.filter({stage: 1}).map(x => x['step']).value()

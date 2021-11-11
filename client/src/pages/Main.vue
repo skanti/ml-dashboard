@@ -171,26 +171,37 @@ export default {
       let charts = {};
       const metrics_all = new Set();
       for (let id of Array.from(this.selected)) {
-        const plot_data0 = this.data[id]['rows'];
+        let plot_data0 = this.data[id]['rows'];
         const color = this.data[id]['color'];
         if (plot_data0 == undefined) {
           continue;
         }
-        const plot_data = lodash(plot_data0).uniqBy(x => [x.step,'_', x.stage].join()).value();
-        // group
-        const metrics = lodash(plot_data[0]).omit(['step', 'epoch', 'stage']).keys().value();
+        // group & find metrics from header
+        const [last_item] = plot_data0.slice(-1);
+        const metrics = lodash(last_item).omit(['step', 'epoch', 'stage']).keys().value();
         metrics.forEach(x => metrics_all.add(x));
+        // add timestamp field if missing
+        if (metrics.includes('timestamp')) {
+          plot_data0 = plot_data0.map(x => ({ ...x, timestamp: new Date(x.timestamp*1e3) }));
+        } else {
+          const now = new Date();
+          plot_data0 = plot_data0.map(x => ({ ...x, timestamp: now }));
+        }
+        // remove duplicates
+        let plot_data = lodash(plot_data0)
+          .sortBy('timestamp')
+          .uniqBy(x => [x.step,'_', x.stage].join());
         for (let metric of metrics_all.values()) {
           // train
-          let y_train = lodash(plot_data).filter({stage: 0}).map(x => x[metric]).value()
-          let x_train = lodash(plot_data).filter({stage: 0}).map(x => x['step']).value()
+          let y_train = plot_data.filter({stage: 0}).map(x => x[metric]).value()
+          let x_train = plot_data.filter({stage: 0}).map(x => x['step']).value()
           const mask_train = y_train.map(x => !!x);
           // smooth train curve
           let s = this.settings.smoothing_toggle ? this.settings.smoothing_value: 0.0;
           y_train = this.linear_smooth(y_train, s);
           // val
-          let y_val = lodash(plot_data).filter({stage: 1}).map(x => x[metric]).value()
-          let x_val = lodash(plot_data).filter({stage: 1}).map(x => x['step']).value()
+          let y_val = plot_data.filter({stage: 1}).map(x => x[metric]).value()
+          let x_val = plot_data.filter({stage: 1}).map(x => x['step']).value()
           const mask_val = y_val.map(x => !!x);
           // cleanup
           y_train = y_train.filter((x, i) => mask_train[i]);

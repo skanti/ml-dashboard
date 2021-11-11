@@ -56,7 +56,6 @@ app.get("/api/experiment", function (req, res, next) {
     // pick last
     const data = [];
     //const parser = csv({cast: true, columns: true});
-    let ignore_header = false;
     for (const log_dir of outputs) {
       // HACK: needed to avoid loading from cache (eg.g. mounted S3 bucket)
       spawnSync('ls', [log_dir]);
@@ -67,8 +66,7 @@ app.get("/api/experiment", function (req, res, next) {
         continue
       }
       const buff = fs.readFileSync(csv_path);
-      const rows = csv(buff, {cast: true, columns: true, skipComments: ignore_header } );
-      ignore_header = true; // skip header after first log
+      const rows = csv(buff, {cast: true, columns: true, skipComments: true } );
       data.push(rows);
     }
     // send

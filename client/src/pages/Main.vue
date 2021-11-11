@@ -169,23 +169,34 @@ export default {
     },
     build_charts() {
       let charts = {};
+      const metrics_all = new Set();
       for (let id of Array.from(this.selected)) {
-        let plot_data = this.data[id]['rows'];
+        const plot_data0 = this.data[id]['rows'];
         const color = this.data[id]['color'];
-        if (plot_data == undefined) {
+        if (plot_data0 == undefined) {
           continue;
         }
-        plot_data = lodash(plot_data).reverse().uniqBy('step').reverse().value();
+        const plot_data = lodash(plot_data0).uniqBy(x => [x.step,'_', x.stage].join()).value();
         // group
         const metrics = lodash(plot_data[0]).omit(['step', 'epoch', 'stage']).keys().value();
-        for (let metric of metrics) {
-          // smooth train curve
+        metrics.forEach(x => metrics_all.add(x));
+        for (let metric of metrics_all.values()) {
+          // train
           let y_train = lodash(plot_data).filter({stage: 0}).map(x => x[metric]).value()
+          let x_train = lodash(plot_data).filter({stage: 0}).map(x => x['step']).value()
+          const mask_train = y_train.map(x => !!x);
+          // smooth train curve
           let s = this.settings.smoothing_toggle ? this.settings.smoothing_value: 0.0;
           y_train = this.linear_smooth(y_train, s);
-          const x_train = lodash(plot_data).filter({stage: 0}).map(x => x['step']).value()
-          const y_val = lodash(plot_data).filter({stage: 1}).map(x => x[metric]).value()
-          const x_val = lodash(plot_data).filter({stage: 1}).map(x => x['step']).value()
+          // val
+          let y_val = lodash(plot_data).filter({stage: 1}).map(x => x[metric]).value()
+          let x_val = lodash(plot_data).filter({stage: 1}).map(x => x['step']).value()
+          const mask_val = y_val.map(x => !!x);
+          // cleanup
+          y_train = y_train.filter((x, i) => mask_train[i]);
+          x_train = x_train.filter((x, i) => mask_train[i]);
+          y_val = y_val.filter((x, i) => mask_val[i]);
+          x_val = x_val.filter((x, i) => mask_val[i]);
           const chart = { experiment_id: id, metric: metric, visible: this.settings.show_val,
             train: { y: y_train, x: x_train }, val: { y: y_val, x: x_val}, color: color};
 
@@ -196,7 +207,7 @@ export default {
       this.counter += 1;
       this.charts = charts;
     },
-    click_search_experiments: function() {
+    click_search_experiments () {
       this.loading = true;
       let query = { project_dir: this.project_dir };
       return axios.get('/api/project', { params: query }).then(res => {
@@ -205,14 +216,14 @@ export default {
         this.loading = false;
       });
     },
-    random_color: function() {
+    random_color () {
       let letters = '0123456789ABCDEF';
       let color = '#';
       for (let i = 0; i < 6; i++)
         color += letters[Math.floor(Math.random() * 16)];
       return color;
     },
-    click_experiment: async function(row) {
+    async click_experiment (row) {
       let id = row.id;
       this.loading = true;
       let selected = new Set(this.selected);
@@ -231,7 +242,7 @@ export default {
       this.loading = false;
       this.build_charts();
     },
-    click_refresh: async function() {
+    async click_refresh () {
       if (this.project_dir == '')
         return;
       await this.click_search_experiments();

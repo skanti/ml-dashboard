@@ -45,7 +45,7 @@
               <q-td key='color' :props='props' >
                 <q-avatar v-if='data[props.row.id] && selected.has(props.row.id)' size='sm'
                   icon='fas fa-palette' :style='"background-color: white; color:" + data[props.row.id].color'
-                  font-size='16px' />
+                  @click.stop='click_color(props.row)' font-size='16px' />
               </q-td>
               <q-td  key='id' :props='props'>
                 <q-btn color='dark' class='text-bold' size='sm'
@@ -113,6 +113,7 @@ import Chart from '@/components/Chart';
 import { copyToClipboard } from 'quasar'
 import lodash from 'lodash';
 import { useQuasar } from 'quasar';
+import ColorPalette from '@/components/ColorPalette';
 
 export default {
   name: 'App',
@@ -123,6 +124,7 @@ export default {
       experiments: [],
       data: {},
       selected: new Set(),
+      palette: new ColorPalette(),
       charts: {},
       loading: false,
       timer: {
@@ -227,13 +229,6 @@ export default {
         this.loading = false;
       });
     },
-    random_color () {
-      let letters = '0123456789ABCDEF';
-      let color = '#';
-      for (let i = 0; i < 6; i++)
-        color += letters[Math.floor(Math.random() * 16)];
-      return color;
-    },
     async click_experiment (row) {
       let id = row.id;
       this.loading = true;
@@ -243,7 +238,7 @@ export default {
       } else {
         try {
           const res = await axios.get('/api/experiment', { params: { project_dir: this.project_dir, experiment: row }});
-          this.data[id] = { rows: res.data, color: this.random_color() };
+          this.data[id] = { rows: res.data, color: this.palette.get() };
           selected.add(id);
         } catch (e) {
           this.$q.notify({ message: 'Failed to load experiment', icon: 'error', color: 'red-5' });
@@ -273,7 +268,7 @@ export default {
       this.loading = false;
       this.build_charts();
     },
-    auto_refresh: function() {
+    auto_refresh () {
       let timer = setInterval(() => {
         this.timer.value += 1.0;
         if (this.timer.value >= this.timer.max) {
@@ -284,11 +279,16 @@ export default {
         }
       }, 1000);
     },
-    click_copy_to_clipboard: function(e, id) {
+    click_copy_to_clipboard (e, id) {
       copyToClipboard(id).then(() => {
         this.$q.notify({ message: 'Copied to clipboard!', icon: 'check_circle', color: 'green-5' });
       });
       e.stopPropagation();
+    },
+    click_color (row) {
+      const { id } = row;
+      this.data[id].color = this.palette.get();
+      this.build_charts();
     }
   },
 }

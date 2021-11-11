@@ -201,7 +201,7 @@ export default {
           let x_train = plot_data.filter({stage: 0}).map(x => x['step']).value()
           const mask_train = y_train.map(x => !!x);
           // smooth train curve
-          if (this.smoothing_toggle && !no_smoothing.has(metric)) {
+          if (this.settings.smoothing_toggle && !no_smoothing.has(metric)) {
             y_train = this.linear_smooth(y_train, this.settings.smoothing_value);
           }
           // val

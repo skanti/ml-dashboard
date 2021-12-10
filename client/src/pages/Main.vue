@@ -182,7 +182,13 @@ export default {
         const no_smoothing = new Set(['timestamp']);
         // group & find metrics from header
         const meta_fields = ['step', 'epoch', 'stage'];
-        const metrics = lodash(plot_data0).flatMap(lodash.keys).uniq().reject(x => meta_fields.includes(x)).value();
+        // ignore fields ending with this pattern
+        const metrics = lodash(plot_data0).flatMap(lodash.keys)
+          .uniq()
+          .reject(x => meta_fields.includes(x))
+          .reject(x => x.endsWith('_step') || x.endsWith('_epoch'))
+          .value();
+        console.log(metrics);
         metrics.forEach(x => metrics_all.add(x));
         // add timestamp field if missing
         if (metrics.includes('timestamp')) {

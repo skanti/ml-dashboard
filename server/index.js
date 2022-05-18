@@ -31,7 +31,8 @@ app.get("/api/project", function (req, res, next) {
       return res.send(err);
     experiments = experiments.map(x => {
       const stats = fs.statSync(x);
-      return { id: path.basename(x), timestamp: stats.birthtime };
+      const timestamp = stats.birthtimeMs === 0 ? stats.mtime : stats.birthtime;
+      return { id: path.basename(x), timestamp: timestamp };
     });
     res.send(experiments);
   });

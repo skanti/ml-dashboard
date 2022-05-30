@@ -10,6 +10,7 @@ const store = createStore({
   plugins: [persisted_state],
   state: {
     project_dir: '',
+    project_dir_history: [],
     settings: {
       smoothing_value: 0.5,
       smoothing_toggle: false,

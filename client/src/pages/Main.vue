@@ -6,6 +6,15 @@
         <q-input class='q-pa-none' v-model='project_dir' label='Project Directory' outlined bottom-slots>
           <template v-slot:prepend>
             <q-icon name='fas fa-folder'/>
+            <q-btn-dropdown flat>
+              <q-list>
+                <q-item v-for='v in project_dir_history' :key='"hist" + v' @click="() => { project_dir = v; }" v-close-popup clickable>
+                  <q-item-section>
+                    <q-item-label>{{v}}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
           </template>
           <template v-slot:append>
             <q-icon name='fas fa-times' @click='project_dir = ""' class='cursor-pointer'/>
@@ -151,7 +160,7 @@ export default {
   },
   computed: {
     ...mapState(['settings']),
-    ...mapFields(['project_dir']),
+    ...mapFields(['project_dir', 'project_dir_history']),
   },
   methods: {
     onchange_settings(v) {
@@ -229,6 +238,11 @@ export default {
       this.charts = charts;
     },
     click_search_experiments () {
+      const known = this.project_dir_history.includes(this.project_dir);
+      if (!known) {
+        this.project_dir_history.unshift(this.project_dir);
+        this.project_dir_history = this.project_dir_history.slice(0, 5);
+      }
       this.loading = true;
       let query = { project_dir: this.project_dir };
       return axios.get('/api/project', { params: query }).then(res => {

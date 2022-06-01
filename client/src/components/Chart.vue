@@ -5,41 +5,46 @@
 <script>
 
 import Plotly from 'plotly.js-dist'
+//import lodash from 'lodash';
 
 export default {
   name: 'Chart',
-  props: [ 'metric', 'data' ],
+  props: [ 'metric', 'data', 'settings' ],
   mounted: function() {
     this.init();
   },
   methods: {
-    init: function() {
+    init() {
       const layout = this.make_layout(this.metric, '');
+
+      const val_visible = this.settings.curve_visibility.includes('show_val');
+      const train_visible = this.settings.curve_visibility.includes('show_train');
 
       let plots = [];
       for (const experiment of this.data) {
-        const experiment_id = experiment['experiment_id'];
-        const visible = experiment['visible'];
-        let data_val = {
-          x: experiment['val']['x'],
-          y: experiment['val']['y'],
+        const experiment_id = experiment.experiment_id;
+
+        const data_val = {
+          x: experiment.val.x,
+          y: experiment.val.y,
           marker: {
-            color: experiment['color']
+            color: experiment.color
           },
           name: experiment_id,
-          visible: visible,
+          visible: val_visible,
           showlegend: true,
           mode: 'lines'
         };
-        let data_train = {
-          x: experiment['train']['x'],
-          y: experiment['train']['y'],
+        const data_train = {
+          x: experiment.train.x,
+          y: experiment.train.y,
           marker: {
-            color: experiment['color']
+            color: experiment.color
           },
           name: experiment_id + ' (train)',
-          showlegend: !visible,
-          mode: 'lines',
+          visible: train_visible,
+          showlegend: !val_visible && train_visible,
+          mode: 'lines' + (this.settings.show_markers ? '+markers' : ''),
           line: { dash: 'dash', 'shape': 'spline' },
         };
         plots.push(data_val);

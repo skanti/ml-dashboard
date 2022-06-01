@@ -93,8 +93,14 @@
         </q-input>
         <q-field outlined dense>
           <template v-slot:control>
-            <q-toggle label='Show val' v-model='settings.show_val' color='blue-5'
-              @update:model-value='v => onchange_settings({show_val: v})' dense />
+            <q-option-group v-model='settings.curve_visibility' :options='show_curves_options' color='blue-5'
+              type='checkbox' @update:model-value='v => onchange_settings()' dense inline />
+          </template>
+        </q-field>
+        <q-field outlined dense>
+          <template v-slot:control>
+            <q-toggle label='Show markers' v-model='settings.show_markers' color='blue-5'
+              @update:model-value='v => onchange_settings()' dense />
           </template>
         </q-field>
       </div>
@@ -103,7 +109,7 @@
           :key='"root_plot" + k + "_idx" + counter'>
           <q-card class='bg-grey-1'>
             <q-responsive :ratio='1'>
-              <Chart :metric='k' :data='v'> </Chart>
+              <Chart :metric='k' :data='v' :settings='settings'/>
             </q-responsive>
           </q-card>
         </div>
@@ -135,6 +141,7 @@ export default {
       selected: new Set(),
       palette: new ColorPalette(),
       charts: {},
+      show_curves_options: [ { label: 'Show train', value: 'show_train' }, { label: 'Show val', value: 'show_val' } ],
       loading: false,
       timer: {
         value: 0,
@@ -227,7 +234,7 @@ export default {
           x_train = x_train.filter((x, i) => mask_train[i]);
           y_val = y_val.filter((x, i) => mask_val[i]);
           x_val = x_val.filter((x, i) => mask_val[i]);
-          const chart = { experiment_id: id, metric: metric, visible: this.settings.show_val,
+          const chart = { experiment_id: id, metric: metric,
             train: { y: y_train, x: x_train }, val: { y: y_val, x: x_val}, color: color};
 
           charts[metric] = charts[metric] || [];

@@ -15,7 +15,9 @@ export default {
   },
   methods: {
     init() {
-      const layout = this.make_layout(this.metric, '');
+      const legend_bottomright = this.metric.includes('accuracy');
+      console.log('legend', legend_bottomright);
+      const layout = this.make_layout(this.metric, '', legend_bottomright);
 
       const val_visible = this.settings.curve_visibility.includes('show_val');
       const train_visible = this.settings.curve_visibility.includes('show_train');
@@ -52,9 +54,13 @@ export default {
       }
       Plotly.newPlot('plot_' + this.metric, plots, layout, { displayModeBar: false, responsive: true });
     },
-    make_layout: function(title, yaxis_label) {
-      let layout = {
-        margin: { l: 30, t: 30.0, r : 5, b: 30 },
+    make_layout: function(title, yaxis_label, legend_bottomright) {
+      let legend_pos = { x: 0, y: 1 };
+      if (legend_bottomright) {
+        legend_pos = { x: 0.1, y: 0.2 };
+      }
+      const layout = {
+        margin: { l: 30, t: 30.0, r : 5, b: 30, autoexpand: false },
         title : title,
         titlefont : {size : 16},
         pad : 0,
@@ -72,7 +78,7 @@ export default {
           rangemode: 'tozero',
         },
         showlegend : true,
-        legend : { x : 0, y : 1, orientation : 'v', font : {size : 10},
+        legend : { ...legend_pos, orientation : 'v', font : {size : 10},
           bgcolor: 'rgba(255, 255, 255, 0.5)'},
       }
 

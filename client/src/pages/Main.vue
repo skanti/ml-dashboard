@@ -84,7 +84,7 @@
           <div class='q-mx-sm'> Refresh</div>
           <q-circular-progress :value='parseInt(100*timer.value/timer.max)' size='md' color='orange-5' :max='100.0' show-value />
         </q-btn>
-        <q-input class='' v-model='settings.smoothing_value' label='Smoothing' maxlength='10' style='max-width:150px'
+        <q-input v-model='settings.smoothing_value' label='Smoothing' maxlength='10' style='max-width:150px'
           @update:model-value='v => onchange_settings({smoothing_value: v})' @debounce='300' outlined dense >
           <template v-slot:append>
             <q-toggle v-model='settings.smoothing_toggle' color='blue-5'
@@ -100,6 +100,12 @@
         <q-field outlined dense>
           <template v-slot:control>
             <q-toggle label='Show markers' v-model='settings.show_markers' color='blue-5'
+              @update:model-value='v => onchange_settings()' dense />
+          </template>
+        </q-field>
+        <q-field outlined dense>
+          <template v-slot:control>
+            <q-toggle label='Log scale' v-model='settings.log_scale' color='blue-5'
               @update:model-value='v => onchange_settings()' dense />
           </template>
         </q-field>

@@ -16,7 +16,6 @@ export default {
   methods: {
     init() {
       const legend_bottomright = this.metric.includes('accuracy');
-      console.log('legend', legend_bottomright);
       const layout = this.make_layout(this.metric, '', legend_bottomright);
 
       const val_visible = this.settings.curve_visibility.includes('show_val');
@@ -71,6 +70,7 @@ export default {
           rangemode: 'tozero',
         },
         yaxis: {
+          type: this.settings.log_scale ? 'log' : null,
           title: yaxis_label,
           showline: false,
           showgrid: true,

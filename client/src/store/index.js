@@ -16,6 +16,7 @@ const store = createStore({
       smoothing_toggle: false,
       curve_visibility: ['show_train', 'show_val'],
       show_markers: false,
+      log_scale: false
     }
   },
   getters: {

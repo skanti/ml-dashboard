@@ -193,15 +193,13 @@ export default {
     },
     build_charts() {
       let charts = {};
+
+      const experiments = Array.from(this.selected).filter(x => !!x);
       const metrics_all = new Set();
-      for (let id of Array.from(this.selected)) {
-        let plot_data0 = this.data[id]['rows'];
-        const color = this.data[id]['color'];
-        if (plot_data0 == undefined) {
-          continue;
-        }
-        // no smoothing list
-        const no_smoothing = new Set(['timestamp']);
+      // collect all metrics
+      for (let id of experiments) {
+        const plot_data0 = this.data[id]['rows'];
+
         // group & find metrics from header
         const meta_fields = ['step', 'epoch', 'stage'];
         // ignore fields ending with this pattern
@@ -210,18 +208,32 @@ export default {
           .reject(x => meta_fields.includes(x))
           .reject(x => x.endsWith('_step') || x.endsWith('_epoch'))
           .value();
-        metrics.forEach(x => metrics_all.add(x));
+          metrics.forEach(x => metrics_all.add(x));
+      }
+      metrics_all.add('duration');
+      metrics_all.delete('timestamp');
+
+      // no smoothing list
+      const no_smoothing = new Set(['timestamp', 'duration']);
+      for (let id of experiments) {
+        let plot_data0 = this.data[id]['rows'];
+
+        const color = this.data[id]['color'];
         // add timestamp field if missing
+        const metrics = lodash(plot_data0).flatMap(lodash.keys).uniq().value();
+        const sec2hours = 1.0/3600.0;
         if (metrics.includes('timestamp')) {
-          plot_data0 = plot_data0.map(x => ({ ...x, timestamp: new Date(x.timestamp*1e3) }));
+          const first_timestamp = plot_data0[0].timestamp
+          plot_data0 = plot_data0.map(x => ({ ...x,
+          duration: (x.timestamp - first_timestamp)*sec2hours, timestamp: new Date(x.timestamp*1e3) }));
         } else {
-          const now = new Date();
-          plot_data0 = plot_data0.map(x => ({ ...x, timestamp: now }));
+          plot_data0 = plot_data0.map(x => ({ ...x, duration: 0.0, timestamp: new Date() }));
         }
         // remove duplicates
-        let plot_data = lodash(plot_data0)
+        const plot_data = lodash(plot_data0)
           .sortBy('timestamp')
           .uniqBy(x => [x.step,'_', x.stage].join());
+        console.log(metrics_all);
         for (let metric of metrics_all.values()) {
           // train
           let y_train = plot_data.filter({stage: 0}).map(x => x[metric]).value()

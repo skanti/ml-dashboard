@@ -182,10 +182,10 @@ export default {
     },
     linear_smooth(scalars, weight) {  // Weight between 0 and 1
       let last = scalars[0]  // First value in the plot (first timestamp)
-      let smoothed = []
+      const smoothed = []
       for (let i in scalars) {
-        let point = scalars[i];
-        let smoothed_val = last*weight + (1 - weight)*point  // Calculate smoothed value
+        const point = scalars[i];
+        const smoothed_val = last*weight + (1 - weight)*point  // Calculate smoothed value
         smoothed.push(smoothed_val)
         last = smoothed_val // Anchor the last smoothed value
       }
@@ -233,16 +233,11 @@ export default {
         const plot_data = lodash(plot_data0)
           .sortBy('timestamp')
           .uniqBy(x => [x.step,'_', x.stage].join());
-        console.log(metrics_all);
         for (let metric of metrics_all.values()) {
           // train
           let y_train = plot_data.filter({stage: 0}).map(x => x[metric]).value()
           let x_train = plot_data.filter({stage: 0}).map(x => x['step']).value()
           const mask_train = y_train.map(x => !!x);
-          // smooth train curve
-          if (this.settings.smoothing_toggle && !no_smoothing.has(metric)) {
-            y_train = this.linear_smooth(y_train, this.settings.smoothing_value);
-          }
           // val
           let y_val = plot_data.filter({stage: 1}).map(x => x[metric]).value()
           let x_val = plot_data.filter({stage: 1}).map(x => x['step']).value()
@@ -252,6 +247,10 @@ export default {
           x_train = x_train.filter((x, i) => mask_train[i]);
           y_val = y_val.filter((x, i) => mask_val[i]);
           x_val = x_val.filter((x, i) => mask_val[i]);
+          // smooth train curve
+          if (this.settings.smoothing_toggle && !no_smoothing.has(metric)) {
+            y_train = this.linear_smooth(y_train, this.settings.smoothing_value);
+          }
           const chart = { experiment_id: id, metric: metric,
             train: { y: y_train, x: x_train }, val: { y: y_val, x: x_val}, color: color};
 

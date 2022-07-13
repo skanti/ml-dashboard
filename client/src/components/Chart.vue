@@ -50,6 +50,36 @@ export default {
         };
         plots.push(data_val);
         plots.push(data_train);
+        // plot error corridors
+        if (experiment.train.error) {
+          const upper = experiment.train.x.map((x,i) => experiment.train.y[i] + experiment.train.error[i]);
+          const lower = experiment.train.x.map((x,i) => experiment.train.y[i] - experiment.train.error[i]);
+          //const y_both = upper.concat(lower.reverse());
+          //const x_both = experiment.train.x.concat(experiment.train.x.reverse());
+          //console.log(y_both);
+          
+          const [r,g,b] = this.hex2rgb(experiment.color).map(x => x/255.0);
+          const c = `rgba(${r}, ${g}, ${b}, 0.2)`;
+          const data_error0 = {
+            x: experiment.train.x,
+            y: upper,
+            fillcolor: c,
+            line: { color: 'transparent', shape: 'spline' },
+            visible: train_visible,
+            mode: 'scatter',
+          };
+          plots.push(data_error0);
+          const data_error1 = {
+            x: experiment.train.x,
+            y: lower,
+            fill: 'tonexty',
+            fillcolor: c,
+            line: { color: 'transparent', shape: 'spline' },
+            visible: train_visible,
+            mode: 'scatter',
+          };
+          plots.push(data_error1);
+        }
       }
       Plotly.newPlot('plot_' + this.metric, plots, layout, { displayModeBar: false, responsive: true });
     },
@@ -83,6 +113,14 @@ export default {
       }
 
       return layout;
+    },
+    hex2rgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      if (result) {
+        return [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)]
+      } else {
+        return null;
+      }
     }
   }
 }

@@ -80,23 +80,25 @@
     <div class='col-12 col-sm-9'>
       <div class='row items-center q-pb-md q-gutter-md'>
         <q-btn color='green-5' @click='click_refresh' unelevated dense no-caps>
-          <q-icon name='fas fa-sync-alt' label='hoi'/>
+          <q-icon name='fas fa-sync-alt'/>
           <div class='q-mx-sm'> Refresh</div>
           <q-circular-progress :value='parseInt(100*timer.value/timer.max)' size='md' color='orange-5' :max='100.0' show-value />
         </q-btn>
-        <q-input v-model='settings.smoothing_value' label='Smoothing' maxlength='10' style='max-width:150px'
-          @update:model-value='v => onchange_settings({smoothing_value: v})' @debounce='300' outlined dense >
-          <template v-slot:append>
-            <q-toggle v-model='settings.smoothing_toggle' color='blue-5'
-              @update:model-value='v => onchange_settings({smoothing_toggle: v})' keep-color />
-          </template>
-        </q-input>
         <q-field outlined dense>
           <template v-slot:control>
             <q-option-group v-model='settings.curve_visibility' :options='show_curves_options' color='blue-5'
               type='checkbox' @update:model-value='v => onchange_settings()' dense inline />
           </template>
         </q-field>
+        <q-input v-model='settings.smoothing_value' label='Smoothing' maxlength='10' style='max-width:200px'
+          @update:model-value='v => onchange_settings({smoothing_value: v})' @debounce='300' outlined dense >
+          <template v-slot:append>
+            <q-toggle v-model='settings.smoothing_toggle' color='blue-5'
+              @update:model-value='v => onchange_settings({smoothing_toggle: v})' keep-color />
+            <q-toggle v-model='settings.show_error_bars' color='blue-5' icon='fas fa-grip-lines'
+              @update:model-value='v => onchange_settings({show_error_bars: v})' />
+          </template>
+        </q-input>
         <q-field outlined dense>
           <template v-slot:control>
             <q-toggle label='Show markers' v-model='settings.show_markers' color='blue-5'
@@ -181,15 +183,18 @@ export default {
       this.build_charts();
     },
     linear_smooth(scalars, weight) {  // Weight between 0 and 1
-      let last = scalars[0]  // First value in the plot (first timestamp)
+      let val_last = scalars[0]  // First value in the plot (first timestamp)
       const smoothed = []
+      const errors = [];
       for (let i in scalars) {
-        const point = scalars[i];
-        const smoothed_val = last*weight + (1 - weight)*point  // Calculate smoothed value
-        smoothed.push(smoothed_val)
-        last = smoothed_val // Anchor the last smoothed value
+        const val = scalars[i];
+        const val_smoothed = val_last*weight + (1 - weight)*val  // Calculate smoothed value
+        const e = Math.abs(val - val_smoothed);
+        smoothed.push(val_smoothed)
+        errors.push(e);
+        val_last = val_smoothed // Anchor the last smoothed value
       }
-      return smoothed
+      return [smoothed, errors]
     },
     build_charts() {
       let charts = {};
@@ -248,11 +253,15 @@ export default {
           y_val = y_val.filter((x, i) => mask_val[i]);
           x_val = x_val.filter((x, i) => mask_val[i]);
           // smooth train curve
+          let error = null;
           if (this.settings.smoothing_toggle && !no_smoothing.has(metric)) {
-            y_train = this.linear_smooth(y_train, this.settings.smoothing_value);
+            [y_train, error] = this.linear_smooth(y_train, this.settings.smoothing_value);
+            if (!this.settings.show_error_bars) {
+              error = null;
+            }
           }
           const chart = { experiment_id: id, metric: metric,
-            train: { y: y_train, x: x_train }, val: { y: y_val, x: x_val}, color: color};
+            train: { y: y_train, x: x_train, error: error }, val: { y: y_val, x: x_val}, color: color};
 
           charts[metric] = charts[metric] || [];
           charts[metric].push(chart);

@@ -182,17 +182,29 @@ export default {
       this.$store.commit('settings', v);
       this.build_charts();
     },
-    linear_smooth(scalars, weight) {  // Weight between 0 and 1
-      let val_last = scalars[0]  // First value in the plot (first timestamp)
+    linear_smooth(scalars, params, method) {
+      let val_last = scalars[0];
+      let error_last = 0.0;
+      const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
       const smoothed = []
       const errors = [];
-      for (let i in scalars) {
+      const num  = scalars.length;
+      for (let i = 0; i < num; i++) {
         const val = scalars[i];
-        const val_smoothed = val_last*weight + (1 - weight)*val  // Calculate smoothed value
-        const e = Math.abs(val - val_smoothed);
+        let val_smoothed = null;
+        if (method === 'window') {
+          const left = clamp(i - params.window, 0, num);
+          const arr = lodash.range(left, i).map(j => scalars[j]);
+          const mean = arr.reduce((a, b) => a + b, 0) / arr.length;
+          val_smoothed = mean;
+        } else {
+          val_smoothed = val_last*params.weight + (1.0 - params.weight)*val;
+        }
+        const e = params.weight*error_last + (1.0 - params.weight)*Math.abs(val - val_smoothed);
         smoothed.push(val_smoothed)
         errors.push(e);
-        val_last = val_smoothed // Anchor the last smoothed value
+        val_last = val_smoothed;
+        error_last = e;
       }
       return [smoothed, errors]
     },
@@ -255,7 +267,7 @@ export default {
           // smooth train curve
           let error = null;
           if (this.settings.smoothing_toggle && !no_smoothing.has(metric)) {
-            [y_train, error] = this.linear_smooth(y_train, this.settings.smoothing_value);
+            [y_train, error] = this.linear_smooth(y_train, { weight: this.settings.smoothing_value }, 'ema');
             if (!this.settings.show_error_bars) {
               error = null;
             }

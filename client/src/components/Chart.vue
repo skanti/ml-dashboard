@@ -66,6 +66,7 @@ export default {
             fillcolor: c,
             line: { color: 'transparent', shape: 'spline' },
             visible: train_visible,
+            showlegend: false,
             mode: 'scatter',
           };
           plots.push(data_error0);
@@ -76,6 +77,7 @@ export default {
             fillcolor: c,
             line: { color: 'transparent', shape: 'spline' },
             visible: train_visible,
+            showlegend: false,
             mode: 'scatter',
           };
           plots.push(data_error1);

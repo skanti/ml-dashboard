@@ -58,7 +58,7 @@ export default {
           //const x_both = experiment.train.x.concat(experiment.train.x.reverse());
           //console.log(y_both);
           
-          const [r,g,b] = this.hex2rgb(experiment.color).map(x => x/255.0);
+          const [r,g,b] = this.hex2rgb(experiment.color);
           const c = `rgba(${r}, ${g}, ${b}, 0.2)`;
           const data_error0 = {
             x: experiment.train.x,

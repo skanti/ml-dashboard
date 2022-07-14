@@ -254,11 +254,11 @@ export default {
           // train
           let y_train = plot_data.filter({stage: 0}).map(x => x[metric]).value()
           let x_train = plot_data.filter({stage: 0}).map(x => x['step']).value()
-          const mask_train = y_train.map(x => !!x);
+          const mask_train = y_train.map(x => Number.isFinite(x));
           // val
           let y_val = plot_data.filter({stage: 1}).map(x => x[metric]).value()
           let x_val = plot_data.filter({stage: 1}).map(x => x['step']).value()
-          const mask_val = y_val.map(x => !!x);
+          const mask_val = y_val.map(x => Number.isFinite(x));
           // cleanup
           y_train = y_train.filter((x, i) => mask_train[i]);
           x_train = x_train.filter((x, i) => mask_train[i]);

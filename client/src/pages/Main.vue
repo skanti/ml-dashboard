@@ -96,7 +96,7 @@
             <q-toggle v-model='settings.smoothing_toggle' color='blue-5'
               @update:model-value='v => onchange_settings({smoothing_toggle: v})' keep-color />
             <q-toggle v-model='settings.show_error_bars' color='blue-5' icon='fas fa-grip-lines'
-              @update:model-value='v => onchange_settings({show_error_bars: v})' />
+              @update:model-value='v => onchange_settings({show_error_bars: v})' :disable='!settings.smoothing_toggle'/>
           </template>
         </q-input>
         <q-field outlined dense>

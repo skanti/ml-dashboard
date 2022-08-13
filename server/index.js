@@ -12,12 +12,14 @@ const http = require('http');
 const axios = require('axios');
 const cors = require('cors');
 const assert = require('assert').strict;
-const glob = require("glob");
+const glob = require('glob');
+const compression = require('compression');
 const { spawnSync } = require('child_process');
 
 // express setup
 const app = express();
 app.use(cors());
+app.use(compression());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 

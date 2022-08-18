@@ -231,7 +231,7 @@ export default {
       metrics_all.delete('timestamp');
 
       // no smoothing list
-      const no_smoothing = new Set(['timestamp', 'duration']);
+      const no_smoothing = new Set(['timestamp', 'duration', 'lr']);
       for (let id of experiments) {
         let plot_data0 = this.data[id]['rows'];
 

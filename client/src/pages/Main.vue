@@ -246,10 +246,13 @@ export default {
         } else {
           plot_data0 = plot_data0.map(x => ({ ...x, duration: 0.0, timestamp: new Date() }));
         }
+
         // remove duplicates
         const plot_data = lodash(plot_data0)
-          .sortBy('timestamp')
-          .uniqBy(x => [x.step,'_', x.stage].join());
+          .orderBy('timestamp', 'desc')
+          .uniqBy(x => [x.step,'_', x.stage].join())
+          .orderBy('step', 'asc')
+        
         for (let metric of metrics_all.values()) {
           // train
           let y_train = plot_data.filter({stage: 0}).map(x => x[metric]).value()

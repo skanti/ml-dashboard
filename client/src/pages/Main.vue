@@ -62,6 +62,8 @@
                   <div class='ellipsis'> {{ props.row.id }} </div>
                   <q-tooltip> Copy to clipboard </q-tooltip>
                 </q-btn>
+                <q-btn size='xs' :text-color='props.row.id in starred ? "yellow-8" : "dark"' :icon='props.row.id in starred ? "fas fa-star" : "far fa-star"'
+                  @click.stop='click_star(props.row)' flat dense/>
               </q-td>
               <q-td key='timestamp' :props='props' >
                 <q-btn size='sm' icon='far fa-clock' dense flat>
@@ -157,7 +159,7 @@ export default {
       },
       card_size: 4,
       filter: '',
-      pagination: { sortBy: 'timestamp', descending: true, page: 1, rowsPerPage: 50 },
+      pagination: { sortBy: 'timestamp', descending: true, page: 1, rowsPerPage: 20 },
       columns: [
         { name: 'color', align: 'left', label: 'Color', field: 'color' },
         { name: 'id', align: 'left', label: 'ID', field: 'id', sortable: true },
@@ -167,7 +169,7 @@ export default {
   },
   setup() {
     const q = useQuasar();
-    return { q$: q }
+    return { $q: q }
   },
   created: function () {
     this.click_refresh();
@@ -175,7 +177,7 @@ export default {
   },
   computed: {
     ...mapState(['settings']),
-    ...mapFields(['project_dir', 'project_dir_history']),
+    ...mapFields(['project_dir', 'project_dir_history', 'starred']),
   },
   methods: {
     onchange_settings(v) {
@@ -359,6 +361,18 @@ export default {
       const { id } = row;
       this.data[id].color = this.palette.get();
       this.build_charts();
+    },
+    click_star (row) {
+      const { id } = row;
+      const starred = Object.assign({}, this.starred);
+      if (id in starred) {
+        delete starred[id];
+        this.$q.notify({ message: `Experiment unstarred: ${id}`, color: 'orange-5' });
+      } else {
+        starred[id] = 1;
+        this.$q.notify({ message: `Experiment starred: ${id}`, color: 'green-5' });
+      }
+      this.starred = starred;
     }
   },
 }

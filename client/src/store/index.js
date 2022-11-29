@@ -11,6 +11,7 @@ const store = createStore({
   state: {
     project_dir: '',
     project_dir_history: [],
+    starred: {},
     settings: {
       smoothing_value: 0.5,
       smoothing_toggle: false,
@@ -27,6 +28,9 @@ const store = createStore({
     updateField,
     settings(state, settings) {
       state.settings = Object.assign({}, state.settings, settings);
+    },
+    starred(state, v) {
+      state.starred = v;
     }
   },
   actions: {

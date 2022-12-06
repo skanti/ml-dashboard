@@ -37,7 +37,7 @@
           <template v-slot:top>
             <q-card class='fit' flat>
               <q-card-section>
-                <q-input dense debounce='300' v-model='filter' placeholder='Fuzzy Search'>
+                <q-input dense debounce='500' v-model='filter' placeholder='Fuzzy Search'>
                   <template v-slot:append>
                     <q-icon name='fas fa-search' />
                   </template>
@@ -93,7 +93,7 @@
           </template>
         </q-field>
         <q-input v-model='settings.smoothing_value' label='Smoothing' maxlength='10' style='max-width:200px'
-          @update:model-value='v => onchange_settings({smoothing_value: v})' @debounce='300' outlined dense >
+          @update:model-value='v => onchange_settings({smoothing_value: v})' @debounce='1000' outlined dense >
           <template v-slot:append>
             <q-toggle v-model='settings.smoothing_toggle' color='blue-5'
               @update:model-value='v => onchange_settings({smoothing_toggle: v})' keep-color />

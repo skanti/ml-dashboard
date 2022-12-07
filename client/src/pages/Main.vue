@@ -37,7 +37,7 @@
           <template v-slot:top>
             <q-card class='fit' flat>
               <q-card-section>
-                <q-input dense debounce='300' v-model='filter' placeholder='Fuzzy Search'>
+                <q-input dense debounce='500' v-model='filter' placeholder='Fuzzy Search'>
                   <template v-slot:append>
                     <q-icon name='fas fa-search' />
                   </template>
@@ -93,7 +93,7 @@
           </template>
         </q-field>
         <q-input v-model='settings.smoothing_value' label='Smoothing' maxlength='10' style='max-width:200px'
-          @update:model-value='v => onchange_settings({smoothing_value: v})' @debounce='300' outlined dense >
+          @update:model-value='v => onchange_settings({smoothing_value: v})' @debounce='1000' outlined dense >
           <template v-slot:append>
             <q-toggle v-model='settings.smoothing_toggle' color='blue-5'
               @update:model-value='v => onchange_settings({smoothing_toggle: v})' keep-color />
@@ -259,16 +259,20 @@ export default {
           // train
           let y_train = plot_data.filter({stage: 0}).map(x => x[metric]).value()
           let x_train = plot_data.filter({stage: 0}).map(x => x['step']).value()
+          let timehint_train = plot_data.filter({stage: 0}).map(x => x['timestamp']).value()
           const mask_train = y_train.map(x => Number.isFinite(x));
           // val
           let y_val = plot_data.filter({stage: 1}).map(x => x[metric]).value()
           let x_val = plot_data.filter({stage: 1}).map(x => x['step']).value()
+          let timehint_val = plot_data.filter({stage: 1}).map(x => x['timestamp']).value()
           const mask_val = y_val.map(x => Number.isFinite(x));
           // cleanup
           y_train = y_train.filter((x, i) => mask_train[i]);
           x_train = x_train.filter((x, i) => mask_train[i]);
+          timehint_train = timehint_train.filter((x, i) => mask_train[i]);
           y_val = y_val.filter((x, i) => mask_val[i]);
           x_val = x_val.filter((x, i) => mask_val[i]);
+          timehint_val = timehint_val.filter((x, i) => mask_val[i]);
           // smooth train curve
           let error = null;
           if (this.settings.smoothing_toggle && !no_smoothing.has(metric)) {
@@ -278,7 +282,9 @@ export default {
             }
           }
           const chart = { experiment_id: id, metric: metric,
-            train: { y: y_train, x: x_train, error: error }, val: { y: y_val, x: x_val}, color: color};
+            train: { y: y_train, x: x_train, error: error, hint: timehint_train },
+            val: { y: y_val, x: x_val, hint: timehint_val },
+            color: color};
 
           charts[metric] = charts[metric] || [];
           charts[metric].push(chart);

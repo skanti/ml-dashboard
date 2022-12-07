@@ -10,6 +10,7 @@
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "axios": "^0.23.0",
+    "date-fns": "^2.29.3",
     "plotly.js-dist": "^2.5.1",
     "quasar": "^2.7.5",
     "vue": "^3.0.0",

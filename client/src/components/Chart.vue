@@ -5,12 +5,13 @@
 <script>
 
 import Plotly from 'plotly.js-dist'
+import { format } from 'date-fns'
 //import lodash from 'lodash';
 
 export default {
   name: 'Chart',
   props: [ 'metric', 'data', 'settings' ],
-  mounted: function() {
+  mounted() {
     this.init();
   },
   methods: {
@@ -28,17 +29,19 @@ export default {
         const data_val = {
           x: experiment.val.x,
           y: experiment.val.y,
+          text: experiment.val.hint.map(x => format(x, 'yy-MMM-dd HH-mm-ss')),
           marker: {
             color: experiment.color
           },
           name: experiment_id,
           visible: val_visible,
           showlegend: true,
-          mode: 'lines'
+          mode: 'lines' + (this.settings.show_markers ? '+markers' : ''),
         };
         const data_train = {
           x: experiment.train.x,
           y: experiment.train.y,
+          text: experiment.train.hint.map(x => format(x, 'yy-MMM-dd HH-mm-ss')),
           marker: {
             color: experiment.color
           },

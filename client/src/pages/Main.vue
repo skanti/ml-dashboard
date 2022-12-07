@@ -353,7 +353,7 @@ export default {
     },
     click_copy_to_clipboard (e, id) {
       copyToClipboard(id).then(() => {
-        this.$q.notify({ message: 'Copied to clipboard!', icon: 'check_circle', color: 'green-5' });
+        this.$q.notify({ message: 'Copied to clipboard!', icon: 'fas fa-check-circle', color: 'green-5' });
       });
       e.stopPropagation();
     },

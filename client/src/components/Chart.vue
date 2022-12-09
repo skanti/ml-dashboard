@@ -15,6 +15,16 @@ export default {
     this.init();
   },
   methods: {
+    hex_to_rgba(hex, alpha) {
+      const res = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      if (!res) {
+        return;
+      }
+      const r = parseInt(res[1], 16);
+      const g = parseInt(res[2], 16);
+      const b = parseInt(res[3], 16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    },
     init() {
       const legend_bottomright = this.metric.includes('accuracy');
       const layout = this.make_layout(this.metric, '', legend_bottomright);
@@ -49,7 +59,7 @@ export default {
           visible: train_visible,
           showlegend: !val_visible && train_visible,
           mode: 'lines' + (this.settings.show_markers ? '+markers' : ''),
-          line: { dash: 'dash', 'shape': 'spline' },
+          line: { dash: 'dash', shape: 'spline', color: this.hex_to_rgba(experiment.color, 0.5) },
         };
         plots.push(data_val);
         plots.push(data_train);

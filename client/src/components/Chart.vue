@@ -48,7 +48,8 @@ export default {
             y: experiment.val.y,
             text: experiment.val.hint.map(x => format(x, 'yy-MMM-dd HH-mm-ss')),
             marker: {
-              color: experiment.color
+              color: experiment.color,
+              symbol: 'circle'
             },
             name: experiment_id,
             showlegend: true,
@@ -68,8 +69,19 @@ export default {
             name: experiment_id + ' (train)',
             showlegend: !val_visible && train_visible,
             mode: 'scattergl+lines', //'lines' + (this.settings.show_markers ? '+markers' : ''),
-            line: { dash: 'dash', color: this.hex_to_rgba(experiment.color, 0.5) },
+            line: { dash: 'dash', color: this.hex_to_rgba(experiment.color, 0.5), width: 1.0 },
           };
+          const leading_dot = {
+            x: [experiment.train.x.at(-1)],
+            y: [experiment.train.y.at(-1)],
+            marker: {
+              color: this.hex_to_rgba(experiment.color, 0.5),
+              symbol: 'circle'
+            },
+            showlegend: false,
+            mode: 'scattergl',
+          };
+          plots.push(leading_dot);
           plots.push(data_train);
         }
         // plot error corridors

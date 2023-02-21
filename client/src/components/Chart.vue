@@ -74,6 +74,7 @@ export default {
           const leading_dot = {
             x: [experiment.train.x.at(-1)],
             y: [experiment.train.y.at(-1)],
+            text: [format(experiment.train.hint.at(-1) || new Date(), 'yy-MMM-dd HH-mm-ss')],
             marker: {
               color: this.hex_to_rgba(experiment.color, 0.5),
               symbol: 'circle'

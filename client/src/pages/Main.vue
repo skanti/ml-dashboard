@@ -211,6 +211,7 @@ export default {
       return [smoothed, errors]
     },
     build_charts() {
+      const t0 = new Date().getTime();
       let charts = {};
 
       const experiments = Array.from(this.selected).filter(x => !!x);
@@ -221,13 +222,14 @@ export default {
 
         // group & find metrics from header
         const meta_fields = ['step', 'epoch', 'stage'];
+        const metrics = lodash(plot_data0).flatMap(lodash.keys).uniq().value();
+        plot_data0.metrics = metrics;
         // ignore fields ending with this pattern
-        const metrics = lodash(plot_data0).flatMap(lodash.keys)
-          .uniq()
+        const metrics_clean = lodash(metrics)
           .reject(x => meta_fields.includes(x))
           .reject(x => x.endsWith('_step') || x.endsWith('_epoch'))
           .value();
-          metrics.forEach(x => metrics_all.add(x));
+          metrics_clean.forEach(x => metrics_all.add(x));
       }
       metrics_all.add('duration');
       metrics_all.delete('timestamp');
@@ -238,33 +240,43 @@ export default {
         let plot_data0 = this.data[id]['rows'];
 
         const color = this.data[id]['color'];
-        // add timestamp field if missing
-        const metrics = lodash(plot_data0).flatMap(lodash.keys).uniq().value();
+        //const metrics = lodash(plot_data0).flatMap(lodash.keys).uniq().value();
+        const metrics = plot_data0.metrics;
         const sec2hours = 1.0/3600.0;
         if (metrics.includes('timestamp')) {
           const first_timestamp = plot_data0[0].timestamp
-          plot_data0 = plot_data0.map(x => ({ ...x,
-          duration: (x.timestamp - first_timestamp)*sec2hours, timestamp: new Date(x.timestamp*1e3) }));
+          plot_data0.forEach(x =>  {
+            x.duration = (x.timestamp - first_timestamp)*sec2hours;
+            x.timestamp = new Date(x.timestamp*1e3);
+          });
         } else {
-          plot_data0 = plot_data0.map(x => ({ ...x, duration: 0.0, timestamp: new Date() }));
+          // add timestamp field if missing
+          plot_data0.forEach(x => { 
+            x.duration = 0.0;
+            x.timestamp = new Date();
+          });
         }
 
-        // remove duplicates
+        // remove duplicates & order by step
         const plot_data = lodash(plot_data0)
           .orderBy('timestamp', 'desc')
           .uniqBy(x => [x.step,'_', x.stage].join())
-          .orderBy('step', 'asc')
-        
+          .orderBy('step', 'asc').value();
+
+        // get train & val
+        const train = lodash(plot_data).filter({stage: 0}).value();
+        const val = lodash(plot_data).filter({stage: 1}).value()
+
         for (let metric of metrics_all.values()) {
           // train
-          let y_train = plot_data.filter({stage: 0}).map(x => x[metric]).value()
-          let x_train = plot_data.filter({stage: 0}).map(x => x['step']).value()
-          let timehint_train = plot_data.filter({stage: 0}).map(x => x['timestamp']).value()
+          let y_train = train.map(x => x[metric]);
+          let x_train = train.map(x => x['step']);
+          let timehint_train = train.map(x => x['timestamp']);
           const mask_train = y_train.map(x => Number.isFinite(x));
           // val
-          let y_val = plot_data.filter({stage: 1}).map(x => x[metric]).value()
-          let x_val = plot_data.filter({stage: 1}).map(x => x['step']).value()
-          let timehint_val = plot_data.filter({stage: 1}).map(x => x['timestamp']).value()
+          let y_val = val.map(x => x[metric]);
+          let x_val = val.map(x => x['step']);
+          let timehint_val = val.map(x => x['timestamp']);
           const mask_val = y_val.map(x => Number.isFinite(x));
           // cleanup
           y_train = y_train.filter((x, i) => mask_train[i]);
@@ -292,6 +304,9 @@ export default {
       }
       this.counter += 1;
       this.charts = charts;
+      const t1 = new Date().getTime();
+      const duration = t1 - t0;
+      console.log(`parse_duration=${duration}ms`)
     },
     click_search_experiments () {
       const known = this.project_dir_history.includes(this.project_dir);

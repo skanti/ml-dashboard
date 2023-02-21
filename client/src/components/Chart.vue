@@ -4,13 +4,18 @@
 
 <script>
 
-import Plotly from 'plotly.js-dist'
+import Plotly from 'plotly.js'
 import { format } from 'date-fns'
 //import lodash from 'lodash';
 
 export default {
   name: 'Chart',
   props: [ 'metric', 'data', 'settings' ],
+  data() {
+    return {
+      print_timings: false,
+    }
+  },
   mounted() {
     this.init();
   },
@@ -46,7 +51,7 @@ export default {
           name: experiment_id,
           visible: val_visible,
           showlegend: true,
-          mode: 'lines' + (this.settings.show_markers ? '+markers' : ''),
+          mode: 'scattergl+lines' + (this.settings.show_markers ? '+markers' : ''),
         };
         const data_train = {
           x: experiment.train.x,
@@ -58,8 +63,8 @@ export default {
           name: experiment_id + ' (train)',
           visible: train_visible,
           showlegend: !val_visible && train_visible,
-          mode: 'lines' + (this.settings.show_markers ? '+markers' : ''),
-          line: { dash: 'dash', shape: 'spline', color: this.hex_to_rgba(experiment.color, 0.5) },
+          mode: 'scattergl+lines', //'lines' + (this.settings.show_markers ? '+markers' : ''),
+          line: { dash: 'dash', color: this.hex_to_rgba(experiment.color, 0.5) },
         };
         plots.push(data_val);
         plots.push(data_train);
@@ -96,7 +101,13 @@ export default {
           plots.push(data_error1);
         }
       }
+      const t0 = new Date().getTime();
       Plotly.newPlot('plot_' + this.metric, plots, layout, { displayModeBar: false, responsive: true });
+      const t1 = new Date().getTime();
+      const duration = t1 - t0;
+      if (this.print_timings) {
+        console.log(`plot_duration=${duration}ms`)
+      }
     },
     make_layout: function(title, yaxis_label, legend_bottomright) {
       let legend_pos = { x: 0, y: 1 };

@@ -67,7 +67,7 @@
               </q-td>
               <q-td key='timestamp' :props='props' >
                 <q-btn size='sm' icon='far fa-clock' dense flat>
-                  <q-tooltip> {{ props.row.timestamp }} </q-tooltip>
+                  <q-tooltip> {{ parse_datetime(props.row.timestamp) }} </q-tooltip>
                 </q-btn>
               </q-td>
             </q-tr>
@@ -139,6 +139,8 @@ import { copyToClipboard } from 'quasar'
 import lodash from 'lodash';
 import { useQuasar } from 'quasar';
 import ColorPalette from '@/components/ColorPalette';
+// eslint-disable-next-line
+import { format } from 'date-fns'
 
 export default {
   name: 'App',
@@ -397,6 +399,9 @@ export default {
         this.q$.notify({ message: `Experiment starred: ${id}`, color: 'green-5' });
       }
       this.starred = starred;
+    },
+    parse_datetime(timestamp) {
+      return format(new Date(timestamp), 'yy-MMM-dd HH-mm-ss')
     }
   },
 }

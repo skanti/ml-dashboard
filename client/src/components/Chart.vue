@@ -4,7 +4,7 @@
 
 <script>
 
-import Plotly from 'plotly.js'
+import Plotly from 'plotly.js-dist'
 import { format } from 'date-fns'
 //import lodash from 'lodash';
 
@@ -41,33 +41,37 @@ export default {
       for (const experiment of this.data) {
         const experiment_id = experiment.experiment_id;
 
-        const data_val = {
-          x: experiment.val.x,
-          y: experiment.val.y,
-          text: experiment.val.hint.map(x => format(x, 'yy-MMM-dd HH-mm-ss')),
-          marker: {
-            color: experiment.color
-          },
-          name: experiment_id,
-          visible: val_visible,
-          showlegend: true,
-          mode: 'scattergl+lines' + (this.settings.show_markers ? '+markers' : ''),
-        };
-        const data_train = {
-          x: experiment.train.x,
-          y: experiment.train.y,
-          text: experiment.train.hint.map(x => format(x, 'yy-MMM-dd HH-mm-ss')),
-          marker: {
-            color: experiment.color
-          },
-          name: experiment_id + ' (train)',
-          visible: train_visible,
-          showlegend: !val_visible && train_visible,
-          mode: 'scattergl+lines', //'lines' + (this.settings.show_markers ? '+markers' : ''),
-          line: { dash: 'dash', color: this.hex_to_rgba(experiment.color, 0.5) },
-        };
-        plots.push(data_val);
-        plots.push(data_train);
+        // show validation
+        if (val_visible) {
+          const data_val = {
+            x: experiment.val.x,
+            y: experiment.val.y,
+            text: experiment.val.hint.map(x => format(x, 'yy-MMM-dd HH-mm-ss')),
+            marker: {
+              color: experiment.color
+            },
+            name: experiment_id,
+            showlegend: true,
+            mode: 'scattergl+lines' + (this.settings.show_markers ? '+markers' : ''),
+            line: { color: this.hex_to_rgba(experiment.color, 1.0) },
+          };
+          plots.push(data_val);
+        }
+        if (train_visible) {
+          const data_train = {
+            x: experiment.train.x,
+            y: experiment.train.y,
+            text: experiment.train.hint.map(x => format(x, 'yy-MMM-dd HH-mm-ss')),
+            marker: {
+              color: experiment.color
+            },
+            name: experiment_id + ' (train)',
+            showlegend: !val_visible && train_visible,
+            mode: 'scattergl+lines', //'lines' + (this.settings.show_markers ? '+markers' : ''),
+            line: { dash: 'dash', color: this.hex_to_rgba(experiment.color, 0.5) },
+          };
+          plots.push(data_train);
+        }
         // plot error corridors
         if (experiment.train.error) {
           const upper = experiment.train.x.map((x,i) => experiment.train.y[i] + experiment.train.error[i]);

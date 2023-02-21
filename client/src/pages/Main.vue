@@ -169,7 +169,7 @@ export default {
   },
   setup() {
     const q = useQuasar();
-    return { $q: q }
+    return { q$: q }
   },
   created: function () {
     this.click_refresh();
@@ -212,7 +212,8 @@ export default {
     },
     build_charts() {
       const t0 = new Date().getTime();
-      let charts = {};
+
+      const charts = {};
 
       const experiments = Array.from(this.selected).filter(x => !!x);
       const metrics_all = new Set();
@@ -245,18 +246,19 @@ export default {
         const sec2hours = 1.0/3600.0;
         if (metrics.includes('timestamp')) {
           const first_timestamp = plot_data0[0].timestamp
-          plot_data0.forEach(x =>  {
-            x.duration = (x.timestamp - first_timestamp)*sec2hours;
-            x.timestamp = new Date(x.timestamp*1e3);
-          });
+          plot_data0 = plot_data0.map(x =>  ({
+            ...x,
+            duration: (x.timestamp - first_timestamp)*sec2hours,
+            timestamp: new Date(x.timestamp*1e3)
+          }));
         } else {
           // add timestamp field if missing
-          plot_data0.forEach(x => { 
-            x.duration = 0.0;
-            x.timestamp = new Date();
-          });
+          plot_data0 = plot_data0.map(x => ({ 
+            ...x,
+            duration: 0.0,
+            timestamp: new Date()
+          }));
         }
-
         // remove duplicates & order by step
         const plot_data = lodash(plot_data0)
           .orderBy('timestamp', 'desc')
@@ -266,36 +268,37 @@ export default {
         // get train & val
         const train = lodash(plot_data).filter({stage: 0}).value();
         const val = lodash(plot_data).filter({stage: 1}).value()
+        const x_train = train.map(x => x['step']);
+        const x_val = val.map(x => x['step']);
+        const timehint_train = train.map(x => x['timestamp']);
+        const timehint_val = val.map(x => x['timestamp']);
 
         for (let metric of metrics_all.values()) {
           // train
-          let y_train = train.map(x => x[metric]);
-          let x_train = train.map(x => x['step']);
-          let timehint_train = train.map(x => x['timestamp']);
+          const y_train = train.map(x => x[metric]);
           const mask_train = y_train.map(x => Number.isFinite(x));
           // val
-          let y_val = val.map(x => x[metric]);
-          let x_val = val.map(x => x['step']);
-          let timehint_val = val.map(x => x['timestamp']);
+          const y_val = val.map(x => x[metric]);
           const mask_val = y_val.map(x => Number.isFinite(x));
           // cleanup
-          y_train = y_train.filter((x, i) => mask_train[i]);
-          x_train = x_train.filter((x, i) => mask_train[i]);
-          timehint_train = timehint_train.filter((x, i) => mask_train[i]);
-          y_val = y_val.filter((x, i) => mask_val[i]);
-          x_val = x_val.filter((x, i) => mask_val[i]);
-          timehint_val = timehint_val.filter((x, i) => mask_val[i]);
+          const y_train_cleaned = y_train.filter((x, i) => mask_train[i]);
+          const x_train_cleaned = x_train.filter((x, i) => mask_train[i]);
+          const y_val_cleaned = y_val.filter((x, i) => mask_val[i]);
+          const x_val_cleaned = x_val.filter((x, i) => mask_val[i]);
+          const timehint_train_cleaned = timehint_train.filter((x, i) => mask_train[i]);
+          const timehint_val_cleaned = timehint_val.filter((x, i) => mask_val[i]);
           // smooth train curve
           let error = null;
+          let y_train_smoothed = y_train_cleaned;
           if (this.settings.smoothing_toggle && !no_smoothing.has(metric)) {
-            [y_train, error] = this.linear_smooth(y_train, { weight: this.settings.smoothing_value }, 'ema');
+            [y_train_smoothed, error] = this.linear_smooth(y_train_cleaned, { weight: this.settings.smoothing_value }, 'ema');
             if (!this.settings.show_error_bars) {
               error = null;
             }
           }
           const chart = { experiment_id: id, metric: metric,
-            train: { y: y_train, x: x_train, error: error, hint: timehint_train },
-            val: { y: y_val, x: x_val, hint: timehint_val },
+            train: { y: y_train_smoothed, x: x_train_cleaned, error: error, hint: timehint_train_cleaned },
+            val: { y: y_val_cleaned, x: x_val_cleaned, hint: timehint_val_cleaned },
             color: color};
 
           charts[metric] = charts[metric] || [];
@@ -334,7 +337,7 @@ export default {
           this.data[id] = { rows: res.data, color: this.palette.get() };
           selected.add(id);
         } catch (e) {
-          this.$q.notify({ message: 'Failed to load experiment', icon: 'error', color: 'red-5' });
+          this.q$.notify({ message: 'Failed to load experiment', icon: 'error', color: 'red-5' });
         }
       }
       this.selected = selected;
@@ -374,7 +377,7 @@ export default {
     },
     click_copy_to_clipboard (e, id) {
       copyToClipboard(id).then(() => {
-        this.$q.notify({ message: 'Copied to clipboard!', icon: 'fas fa-check-circle', color: 'green-5' });
+        this.q$.notify({ message: 'Copied to clipboard!', icon: 'fas fa-check-circle', color: 'green-5' });
       });
       e.stopPropagation();
     },
@@ -388,10 +391,10 @@ export default {
       const starred = Object.assign({}, this.starred);
       if (id in starred) {
         delete starred[id];
-        this.$q.notify({ message: `Experiment unstarred: ${id}`, color: 'orange-5' });
+        this.q$.notify({ message: `Experiment unstarred: ${id}`, color: 'orange-5' });
       } else {
         starred[id] = 1;
-        this.$q.notify({ message: `Experiment starred: ${id}`, color: 'green-5' });
+        this.q$.notify({ message: `Experiment starred: ${id}`, color: 'green-5' });
       }
       this.starred = starred;
     }

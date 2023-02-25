@@ -169,6 +169,7 @@ export default {
         { value: 0, color: 'blue-5', icon: 'fas fa-exclamation-circle' },
         { value: 1, color: 'green-5', icon: 'fas fa-plus-circle' },
         { value: -1, color: 'red-5', icon: 'fas fa-minus-circle' },
+        { value: -2, color: 'purple-5', icon: 'fas fa-bug' },
         { value: undefined, color: 'dark', icon: '' }
       ],
       loading: false,

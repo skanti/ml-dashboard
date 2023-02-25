@@ -11,6 +11,7 @@ const store = createStore({
   state: {
     project_dir: '',
     project_dir_history: [],
+    search: '',
     starred: {},
     rating: {},
     settings: {

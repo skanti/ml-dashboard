@@ -32,12 +32,12 @@
     <div class='col-12 col-sm-3'>
       <q-card color='blue-5'>
         <q-table ref='my_table' tabindex='0' title='Experiments' :rows='experiments' :loading='loading'
-          :columns='columns' :pagination='pagination' row-key='id' :filter='filter' @row-click='click_experiment'>
+          :columns='columns' :pagination='pagination' row-key='id' :filter='search' @row-click='click_experiment'>
           <!-- header -->
           <template v-slot:top>
             <q-card class='fit' flat>
               <q-card-section>
-                <q-input dense debounce='500' v-model='filter' placeholder='Fuzzy Search'>
+                <q-input dense debounce='500' v-model='search' placeholder='Fuzzy Search'>
                   <template v-slot:append>
                     <q-icon name='fas fa-search' />
                   </template>
@@ -64,10 +64,17 @@
                 </q-btn>
                 <q-btn size='xs' :text-color='props.row.id in starred ? "yellow-8" : "dark"' :icon='props.row.id in starred ? "fas fa-star" : "far fa-star"'
                   @click.stop='click_star(props.row)' flat dense/>
-                <q-btn size='xs' :text-color='rating[props.row.id] === 1 ? "green-5" : "dark"' :icon='rating[props.row.id] === 1 ? "fas fa-thumbs-up" : "far fa-thumbs-up"'
-                  @click.stop='click_rate(props.row, 1)' flat dense/>
-                <q-btn size='xs' :text-color='rating[props.row.id] === -1 ? "red-5" : "dark"' :icon='rating[props.row.id] === -1 ? "fas fa-thumbs-down" : "far fa-thumbs-down"'
-                  @click.stop='click_rate(props.row, -1)' flat dense/>
+
+                <q-btn-dropdown size='xs' :color='make_rating_style(props.row).color'
+                  :icon='make_rating_style(props.row).icon' @click.stop dense flat auto-close>
+                  <q-list>
+                    <q-item v-for='r in rating_options' clickable v-close-popup @click.stop='click_rate(props.row, r.value)' :key='"rating" + r.value'>
+                      <q-item-section>
+                        <q-btn size='xs' :text-color='r.color' :icon='r.icon' flat dense/>
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-btn-dropdown>
               </q-td>
               <q-td key='timestamp' :props='props' >
                 <q-btn size='sm' icon='far fa-clock' dense flat>
@@ -158,13 +165,18 @@ export default {
       palette: new ColorPalette(),
       charts: {},
       show_curves_options: [ { label: 'Show train', value: 'show_train' }, { label: 'Show val', value: 'show_val' } ],
+      rating_options: [
+        { value: 0, color: 'blue-5', icon: 'fas fa-exclamation-circle' },
+        { value: 1, color: 'green-5', icon: 'fas fa-plus-circle' },
+        { value: -1, color: 'red-5', icon: 'fas fa-minus-circle' },
+        { value: null, color: 'dark', icon: '' }
+      ],
       loading: false,
       timer: {
         value: 0,
         max: 30, // <- in seconds
       },
       card_size: 4,
-      filter: '',
       pagination: { sortBy: 'timestamp', descending: true, page: 1, rowsPerPage: 20 },
       columns: [
         { name: 'color', align: 'left', label: 'Color', field: 'color' },
@@ -183,7 +195,7 @@ export default {
   },
   computed: {
     ...mapState(['settings']),
-    ...mapFields(['project_dir', 'project_dir_history', 'starred', 'rating']),
+    ...mapFields(['project_dir', 'project_dir_history', 'search', 'starred', 'rating']),
   },
   methods: {
     onchange_settings(v) {
@@ -409,12 +421,17 @@ export default {
       const rating = Object.assign({}, this.rating);
       if (rating[id] == value) {
         rating[id] = 0;
-        this.q$.notify({ message: `Experiment unreated: ${id}`, color: 'orange-5' });
       } else {
         rating[id] = value;
-        this.q$.notify({ message: `Experiment rating: ${id}`, color: 'green-5' });
       }
       this.rating = rating;
+    },
+    make_rating_style(row) {
+      const { id } = row;
+      const value = this.rating[id];
+      const hit = this.rating_options.find(x => x.value === value);
+      console.log(id, value);
+      return hit;
     },
     parse_datetime(timestamp) {
       return format(new Date(timestamp), 'yy-MMM-dd HH-mm-ss')

@@ -1,6 +1,6 @@
 <template>
   <!-- search bar -->
-  <div class='row q-pa-md' id='div_menu_bar'>
+  <div class='row q-pa-sm' id='div_menu_bar'>
     <div class='row items-center q-col-gutter-md' style='width:100%'>
       <div class='col-9 col-sm-6'>
         <q-input class='q-pa-none' v-model='project_dir' label='Project Directory' outlined bottom-slots>
@@ -28,7 +28,7 @@
   <!-- search bar -->
 
   <!-- table -->
-  <div class='row q-pa-md q-col-gutter-lg'>
+  <div class='row q-pa-sm q-col-gutter-md'>
     <div class='col-12 col-sm-3'>
       <q-card color='blue-5'>
         <q-table ref='my_table' tabindex='0' title='Experiments' :rows='experiments' :loading='loading'
@@ -46,6 +46,14 @@
             </q-card>
           </template>
           <!-- header -->
+
+          <template v-slot:header="props">
+            <q-tr :props="props">
+              <q-th v-for="col in props.cols" :key="col.name" :props="props">
+                {{ col.label }}
+              </q-th>
+            </q-tr>
+          </template>
 
           <!-- body -->
           <template v-slot:body='props'>
@@ -180,7 +188,7 @@ export default {
       card_size: 4,
       pagination: { sortBy: 'timestamp', descending: true, page: 1, rowsPerPage: 50 },
       columns: [
-        { name: 'color', align: 'left', label: 'Color', field: 'color' },
+        { name: 'color', align: 'left', label: 'Col', field: 'color' },
         { name: 'id', align: 'left', label: 'ID', field: 'id', sortable: true },
         { name: 'timestamp', align: 'left', label: 'Date', field: 'timestamp', sortable: true },
       ]
@@ -440,5 +448,11 @@ export default {
 }
 </script>
 
-<style lang='sass'>
+<style lang='scss' scoped>
+tbody tr td {
+  padding: 8px;
+}
+thead tr th {
+  padding: 8px;
+}
 </style>

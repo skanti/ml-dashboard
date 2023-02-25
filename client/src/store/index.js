@@ -12,6 +12,7 @@ const store = createStore({
     project_dir: '',
     project_dir_history: [],
     starred: {},
+    rating: {},
     settings: {
       smoothing_value: 0.5,
       smoothing_toggle: false,
@@ -31,6 +32,9 @@ const store = createStore({
     },
     starred(state, v) {
       state.starred = v;
+    },
+    rating(state, v) {
+      state.rating = v;
     }
   },
   actions: {

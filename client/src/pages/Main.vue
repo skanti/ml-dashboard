@@ -64,6 +64,10 @@
                 </q-btn>
                 <q-btn size='xs' :text-color='props.row.id in starred ? "yellow-8" : "dark"' :icon='props.row.id in starred ? "fas fa-star" : "far fa-star"'
                   @click.stop='click_star(props.row)' flat dense/>
+                <q-btn size='xs' :text-color='rating[props.row.id] === 1 ? "green-5" : "dark"' :icon='rating[props.row.id] === 1 ? "fas fa-thumbs-up" : "far fa-thumbs-up"'
+                  @click.stop='click_rate(props.row, 1)' flat dense/>
+                <q-btn size='xs' :text-color='rating[props.row.id] === -1 ? "red-5" : "dark"' :icon='rating[props.row.id] === -1 ? "fas fa-thumbs-down" : "far fa-thumbs-down"'
+                  @click.stop='click_rate(props.row, -1)' flat dense/>
               </q-td>
               <q-td key='timestamp' :props='props' >
                 <q-btn size='sm' icon='far fa-clock' dense flat>
@@ -179,7 +183,7 @@ export default {
   },
   computed: {
     ...mapState(['settings']),
-    ...mapFields(['project_dir', 'project_dir_history', 'starred']),
+    ...mapFields(['project_dir', 'project_dir_history', 'starred', 'rating']),
   },
   methods: {
     onchange_settings(v) {
@@ -399,6 +403,18 @@ export default {
         this.q$.notify({ message: `Experiment starred: ${id}`, color: 'green-5' });
       }
       this.starred = starred;
+    },
+    click_rate(row, value) {
+      const { id } = row;
+      const rating = Object.assign({}, this.rating);
+      if (rating[id] == value) {
+        rating[id] = 0;
+        this.q$.notify({ message: `Experiment unreated: ${id}`, color: 'orange-5' });
+      } else {
+        rating[id] = value;
+        this.q$.notify({ message: `Experiment rating: ${id}`, color: 'green-5' });
+      }
+      this.rating = rating;
     },
     parse_datetime(timestamp) {
       return format(new Date(timestamp), 'yy-MMM-dd HH-mm-ss')

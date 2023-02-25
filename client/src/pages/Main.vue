@@ -169,7 +169,7 @@ export default {
         { value: 0, color: 'blue-5', icon: 'fas fa-exclamation-circle' },
         { value: 1, color: 'green-5', icon: 'fas fa-plus-circle' },
         { value: -1, color: 'red-5', icon: 'fas fa-minus-circle' },
-        { value: null, color: 'dark', icon: '' }
+        { value: undefined, color: 'dark', icon: '' }
       ],
       loading: false,
       timer: {
@@ -177,7 +177,7 @@ export default {
         max: 30, // <- in seconds
       },
       card_size: 4,
-      pagination: { sortBy: 'timestamp', descending: true, page: 1, rowsPerPage: 20 },
+      pagination: { sortBy: 'timestamp', descending: true, page: 1, rowsPerPage: 50 },
       columns: [
         { name: 'color', align: 'left', label: 'Color', field: 'color' },
         { name: 'id', align: 'left', label: 'ID', field: 'id', sortable: true },
@@ -430,7 +430,6 @@ export default {
       const { id } = row;
       const value = this.rating[id];
       const hit = this.rating_options.find(x => x.value === value);
-      console.log(id, value);
       return hit;
     },
     parse_datetime(timestamp) {

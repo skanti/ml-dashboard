@@ -21,10 +21,6 @@ class ColorPalette {
       '#0000ff',
       //fuchsia
       '#ff00ff',
-      //khaki
-      '#f0e68c',
-      //metal
-      '#415764',
       //deeppink
       '#ff1493',
       //mediumslateblue

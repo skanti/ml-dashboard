@@ -1,6 +1,8 @@
 class ColorPalette {
   constructor() {
     this.palette = [
+      // dark green
+      '#033500',
       //darkslategray
       '#2f4f4f',
       //darkred
@@ -11,8 +13,6 @@ class ColorPalette {
       '#800080',
       //darkorange
       '#ff8c00',
-      //mediumspringgreen
-      '#00fa9a',
       //red
       '#ff0000',
       //deepskyblue
@@ -23,8 +23,8 @@ class ColorPalette {
       '#ff00ff',
       //khaki
       '#f0e68c',
-      //plum
-      '#dda0dd',
+      //metal
+      '#415764',
       //deeppink
       '#ff1493',
       //mediumslateblue

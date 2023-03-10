@@ -176,8 +176,10 @@ export default {
       rating_options: [
         { value: 0, color: 'blue-5', icon: 'fas fa-exclamation-circle' },
         { value: 1, color: 'green-5', icon: 'fas fa-plus-circle' },
+        { value: 2, color: 'orange-5', icon: 'fas fa-dot-circle' },
         { value: -1, color: 'red-5', icon: 'fas fa-minus-circle' },
         { value: -2, color: 'purple-5', icon: 'fas fa-bug' },
+        { value: -3, color: 'black-5', icon: 'fas fa-skull-crossbones' },
         { value: undefined, color: 'dark', icon: '' }
       ],
       loading: false,

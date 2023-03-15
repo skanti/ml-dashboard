@@ -14,6 +14,7 @@ const store = createStore({
     search: '',
     starred: {},
     rating: {},
+    notes: {},
     settings: {
       smoothing_value: 0.5,
       smoothing_toggle: false,
@@ -30,6 +31,9 @@ const store = createStore({
     updateField,
     settings(state, settings) {
       state.settings = Object.assign({}, state.settings, settings);
+    },
+    notes(state, notes) {
+      state.notes = Object.assign({}, state.notes, notes);
     },
     starred(state, v) {
       state.starred = v;

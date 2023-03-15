@@ -65,14 +65,18 @@
                   @click.stop='click_color(props.row)' font-size='16px' />
               </q-td>
               <q-td  key='id' :props='props'>
+                <!-- experiment name -->
                 <q-btn color='dark' class='text-bold' size='sm'
                   @click='e => click_copy_to_clipboard(e, props.row.id)' flat dense no-caps>
                   <div class='ellipsis'> {{ props.row.id }} </div>
                   <q-tooltip> Copy to clipboard </q-tooltip>
                 </q-btn>
+
+                <!-- starring -->
                 <q-btn size='xs' :text-color='props.row.id in starred ? "yellow-8" : "dark"' :icon='props.row.id in starred ? "fas fa-star" : "far fa-star"'
                   @click.stop='click_star(props.row)' flat dense/>
 
+                <!-- rating -->
                 <q-btn-dropdown size='xs' :color='make_rating_style(props.row).color'
                   :icon='make_rating_style(props.row).icon' @click.stop dense flat auto-close>
                   <q-list>
@@ -83,6 +87,14 @@
                     </q-item>
                   </q-list>
                 </q-btn-dropdown>
+
+                <!-- notes -->
+                <q-btn class='q-ml-md' color='dark' :icon='(notes[props.row.id] ? "fas" : "far") + " fa-comment-alt"' size='sm' @click.stop dense flat no-caps>
+                  <q-tooltip v-if='notes[props.row.id]'> {{ notes[props.row.id] }} </q-tooltip>
+                  <q-popup-edit v-model='notes[props.row.id]' @update:model-value='v => onchange_notes(props.row.id, v)' auto-save v-slot="scope">
+                    <q-input type='textarea' v-model='scope.value' dense autofocus @keyup.enter.stop />
+                  </q-popup-edit>
+                </q-btn>
               </q-td>
               <q-td key='timestamp' :props='props' >
                 <q-btn size='sm' icon='far fa-clock' dense flat>
@@ -206,12 +218,16 @@ export default {
   },
   computed: {
     ...mapState(['settings']),
-    ...mapFields(['project_dir', 'project_dir_history', 'search', 'starred', 'rating']),
+    ...mapFields(['project_dir', 'project_dir_history', 'search', 'starred', 'rating', 'notes']),
   },
   methods: {
     onchange_settings(v) {
       this.$store.commit('settings', v);
       this.build_charts();
+    },
+    onchange_notes(key, val) {
+      console.log(key, val);
+      this.$store.commit('notes', { key: val });
     },
     linear_smooth(scalars, params, method) {
       let val_last = scalars[0];

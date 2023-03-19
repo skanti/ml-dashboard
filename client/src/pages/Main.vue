@@ -32,20 +32,26 @@
     <div class='col-12 col-sm-3'>
       <q-card color='blue-5'>
         <q-table ref='my_table' tabindex='0' title='Experiments' :rows='experiments' :loading='loading'
-          :columns='columns' :pagination='pagination' row-key='id' :filter='search' @row-click='click_experiment'>
+          :columns='columns' :pagination='pagination' row-key='id' :filter='{}' :filter-method='filter_method' @row-click='click_experiment'>
           <!-- header -->
           <template v-slot:top>
             <q-card class='fit' flat>
-              <q-card-section>
+              <q-card-section class='q-pa-sm'>
+                <!-- fuzzy search -->
                 <q-input dense debounce='500' v-model='search' placeholder='Fuzzy Search'>
                   <template v-slot:append>
                     <q-icon name='fas fa-search' />
                   </template>
                 </q-input>
               </q-card-section>
+
+                <!-- emoji filter -->
+                <q-card-section class='q-pa-sm'>
+                  <q-toggle v-for='r in rating_options.slice(0, -1)' v-model='rating_filter' :color='r.color'
+                    :val='r.value' :icon='r.icon' size='sm' :key='"rating_filter_" + r.label' keep-color/>
+                </q-card-section>
             </q-card>
           </template>
-          <!-- header -->
 
           <template v-slot:header="props">
             <q-tr :props="props">
@@ -176,7 +182,7 @@ import { format } from 'date-fns'
 export default {
   name: 'App',
   components: { Chart },
-  data () {
+  data() {
     return {
       counter: 0,
       experiments: [],
@@ -186,13 +192,13 @@ export default {
       charts: {},
       show_curves_options: [ { label: 'Show train', value: 'show_train' }, { label: 'Show val', value: 'show_val' } ],
       rating_options: [
-        { value: 0, color: 'blue-5', icon: 'fas fa-exclamation-circle' },
-        { value: 1, color: 'green-5', icon: 'fas fa-plus-circle' },
-        { value: 2, color: 'orange-5', icon: 'fas fa-dot-circle' },
-        { value: -1, color: 'red-5', icon: 'fas fa-minus-circle' },
-        { value: -2, color: 'purple-5', icon: 'fas fa-bug' },
-        { value: -3, color: 'black-5', icon: 'fas fa-skull-crossbones' },
-        { value: undefined, color: 'dark', icon: '' }
+        { value: 0, color: 'blue-5', icon: 'fas fa-exclamation-circle', label: 'new' },
+        { value: 1, color: 'green-5', icon: 'fas fa-plus-circle', label: 'success' },
+        { value: 2, color: 'orange-5', icon: 'fas fa-dot-circle', label: 'average' },
+        { value: -1, color: 'red-5', icon: 'fas fa-minus-circle', label: 'failure' },
+        { value: -2, color: 'purple-5', icon: 'fas fa-bug', label: 'bug' },
+        { value: -3, color: 'black', icon: 'fas fa-skull-crossbones', label: 'crash' },
+        { value: undefined, color: 'dark', icon: '', label: '' }
       ],
       loading: false,
       timer: {
@@ -212,13 +218,13 @@ export default {
     const q = useQuasar();
     return { q$: q }
   },
-  created: function () {
+  created() {
     this.click_refresh();
     this.auto_refresh();
   },
   computed: {
     ...mapState(['settings']),
-    ...mapFields(['project_dir', 'project_dir_history', 'search', 'starred', 'rating', 'notes']),
+    ...mapFields(['project_dir', 'project_dir_history', 'search', 'starred', 'rating', 'rating_filter', 'notes']),
   },
   methods: {
     onchange_settings(v) {
@@ -226,7 +232,6 @@ export default {
       this.build_charts();
     },
     onchange_notes(key, val) {
-      console.log(key, val);
       this.$store.commit('notes', { key: val });
     },
     linear_smooth(scalars, params, method) {
@@ -452,6 +457,18 @@ export default {
         rating[id] = value;
       }
       this.rating = rating;
+    },
+    filter_method(rows) {
+      // fuzzy filter
+      if (this.search) {
+        rows = rows.filter(x => x.id.includes(this.search));
+      }
+
+      // filter for ratings
+      const ratings = new Set(this.rating_filter);
+      ratings.add(undefined);
+      rows = rows.filter(x => ratings.has(this.rating[x.id]));
+      return rows;
     },
     make_rating_style(row) {
       const { id } = row;

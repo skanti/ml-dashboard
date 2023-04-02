@@ -462,12 +462,12 @@ export default {
       // fuzzy filter
       if (this.search) {
         rows = rows.filter(x => x.id.includes(this.search));
+      } else {
+        // filter for ratings
+        const ratings = new Set(this.rating_filter);
+        ratings.add(undefined);
+        rows = rows.filter(x => ratings.has(this.rating[x.id]));
       }
-
-      // filter for ratings
-      const ratings = new Set(this.rating_filter);
-      ratings.add(undefined);
-      rows = rows.filter(x => ratings.has(this.rating[x.id]));
       return rows;
     },
     make_rating_style(row) {

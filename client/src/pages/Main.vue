@@ -494,11 +494,12 @@ export default {
     click_upload_state_dict(file) {
       this.q$.dialog({
         title: 'Are you sure to overwrite the state?',
+        cancel: true
       }).onOk(() => {
         const reader = new FileReader()
         reader.onload = () => {
           const data = JSON.parse(reader.result)
-          console.log(data);
+          this.$store.replaceState(data);
         }
         reader.readAsText(file)
       })

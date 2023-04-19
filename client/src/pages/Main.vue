@@ -1,31 +1,32 @@
 <template>
   <!-- search bar -->
-  <div class='row q-pa-sm' id='div_menu_bar'>
-    <div class='row items-center q-col-gutter-md' style='width:100%'>
-      <div class='col-9 col-sm-6'>
-        <q-input class='q-pa-none' v-model='project_dir' label='Project Directory' outlined bottom-slots>
-          <template v-slot:prepend>
-            <q-icon name='fas fa-folder'/>
-            <q-btn-dropdown flat>
-              <q-list>
-                <q-item v-for='v in project_dir_history' :key='"hist" + v' @click="() => { project_dir = v; }" v-close-popup clickable>
-                  <q-item-section>
-                    <q-item-label>{{v}}</q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-btn-dropdown>
-          </template>
-          <template v-slot:append>
-            <q-icon name='fas fa-times' @click='project_dir = ""' class='cursor-pointer'/>
-            <q-btn @click='click_search_experiments' label='Checkout'
-              color='blue-5' icon='fas fa-sign-in-alt' :disable='project_dir == ""' unelevated dense/>
-          </template>
-        </q-input>
-      </div>
-    </div>
+  <div class='row q-pa-sm q-gutter-sm'>
+    <q-input class='q-pa-none' v-model='project_dir' label='Project Directory' outlined bottom-slots>
+      <template v-slot:prepend>
+        <q-icon name='fas fa-folder'/>
+        <q-btn-dropdown flat>
+          <q-list>
+            <q-item v-for='v in project_dir_history' :key='"hist" + v' @click="() => { project_dir = v; }" v-close-popup clickable>
+              <q-item-section>
+                <q-item-label>{{v}}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
+      </template>
+      <template v-slot:append>
+        <q-icon name='fas fa-times' @click='project_dir = ""' class='cursor-pointer'/>
+        <q-btn @click='click_search_experiments' label='Checkout'
+          color='blue-5' icon='fas fa-sign-in-alt' :disable='project_dir == ""' unelevated dense/>
+      </template>
+    </q-input>
+    <q-btn label='Dump State' color='dark' icon='fas fa-download' 
+      @click='click_download_state_dict' flat dense no-caps/>
+    <q-file bg-color='white' label-color='dark' label='Load State' accept='.json'
+      @update:model-value='click_upload_state_dict' filled dense hide-bottom-space item-aligned>
+      <template v-slot:prepend> <q-icon color='dark' name='fas fa-upload' /> </template>
+    </q-file>
   </div>
-  <!-- search bar -->
 
   <!-- table -->
   <div class='row q-pa-sm q-col-gutter-md'>
@@ -478,8 +479,31 @@ export default {
     },
     parse_datetime(timestamp) {
       return format(new Date(timestamp), 'yy-MMM-dd HH-mm-ss')
-    }
-  },
+    },
+    click_download_state_dict() {
+      const state = this.$store.state;
+      const text = JSON.stringify(state);
+      console.log(text);
+      const a = document.createElement('a');
+      const blob = new Blob([text], {type: 'txt'});
+      const url = URL.createObjectURL(blob);
+      a.setAttribute('href', url);
+      a.setAttribute('download', 'ml_state_dict.json');
+      a.click();
+    },
+    click_upload_state_dict(file) {
+      this.q$.dialog({
+        title: 'Are you sure to overwrite the state?',
+      }).onOk(() => {
+        const reader = new FileReader()
+        reader.onload = () => {
+          const data = JSON.parse(reader.result)
+          console.log(data);
+        }
+        reader.readAsText(file)
+      })
+    },
+  }
 }
 </script>
 

@@ -169,6 +169,7 @@
 
 <script>
 
+import { marked } from 'marked';
 import axios from 'axios';
 import { mapState } from 'vuex'
 import { mapFields } from 'vuex-map-fields';
@@ -233,6 +234,7 @@ export default {
       this.build_charts();
     },
     onchange_notes(key, val) {
+      val =  marked(val);
       this.$store.commit('notes', { key: val });
     },
     linear_smooth(scalars, params, method) {

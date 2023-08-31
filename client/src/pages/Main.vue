@@ -98,8 +98,10 @@
                 <!-- notes -->
                 <q-btn class='q-ml-md' color='dark' :icon='(notes[props.row.id] ? "fas" : "far") + " fa-comment-alt"' size='sm' @click.stop dense flat no-caps>
                 <q-tooltip v-if='notes[props.row.id]'> 
-                <div v-html='markdown(notes[props.row.id])'/> </q-tooltip>
-                  <q-popup-edit v-model='notes[props.row.id]' @update:model-value='v => onchange_notes(props.row.id, v)' auto-save v-slot="scope">
+                  <div v-html='markdown(notes[props.row.id])'/>
+                </q-tooltip>
+                <q-popup-edit v-model='notes[props.row.id]' @update:model-value='v => onchange_notes(props.row.id, v)'
+                  auto-save v-slot="scope" style='max-width:400px'>
                   <q-input ref='textarea' type='textarea' rows=3 v-model='scope.value' 
                   @update:model-value='v => markdown(v)' dense autofocus @keyup.enter.stop />
                   <div v-html='markdown(scope.value)'/>
@@ -509,8 +511,11 @@ export default {
       })
     },
     markdown(text) {
-      const v = marked.parse(text);
-      return v;
+      if (text) {
+        return marked.parse(text);
+      } else {
+        return '';
+      }
     }
   }
 }

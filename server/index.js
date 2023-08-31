@@ -43,7 +43,6 @@ app.get("/api/project", function (req, res, next) {
 
 app.get("/api/experiment", function (req, res, next) {
   let { project_dir, experiment } = req.query;
-  experiment = JSON.parse(experiment);
   const search_dir = project_dir + "/" + experiment.id + "/log/version_*";
   const options = { };
   glob(search_dir, options, function (err, outputs) {

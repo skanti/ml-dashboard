@@ -97,9 +97,12 @@
 
                 <!-- notes -->
                 <q-btn class='q-ml-md' color='dark' :icon='(notes[props.row.id] ? "fas" : "far") + " fa-comment-alt"' size='sm' @click.stop dense flat no-caps>
-                  <q-tooltip v-if='notes[props.row.id]'> {{ notes[props.row.id] }} </q-tooltip>
+                <q-tooltip v-if='notes[props.row.id]'> 
+                <div v-html='markdown(notes[props.row.id])'/> </q-tooltip>
                   <q-popup-edit v-model='notes[props.row.id]' @update:model-value='v => onchange_notes(props.row.id, v)' auto-save v-slot="scope">
-                    <q-input type='textarea' v-model='scope.value' dense autofocus @keyup.enter.stop />
+                  <q-input ref='textarea' type='textarea' rows=3 v-model='scope.value' 
+                  @update:model-value='v => markdown(v)' dense autofocus @keyup.enter.stop />
+                  <div v-html='markdown(scope.value)'/>
                   </q-popup-edit>
                 </q-btn>
               </q-td>
@@ -234,7 +237,6 @@ export default {
       this.build_charts();
     },
     onchange_notes(key, val) {
-      val =  marked(val);
       this.$store.commit('notes', { key: val });
     },
     linear_smooth(scalars, params, method) {
@@ -506,6 +508,10 @@ export default {
         reader.readAsText(file)
       })
     },
+    markdown(text) {
+      const v = marked.parse(text);
+      return v;
+    }
   }
 }
 </script>

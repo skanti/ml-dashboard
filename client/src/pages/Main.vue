@@ -96,15 +96,15 @@
                 </q-btn-dropdown>
 
                 <!-- notes -->
-                <q-btn class='q-ml-md' color='dark' :icon='(notes[props.row.id] ? "fas" : "far") + " fa-comment-alt"' size='sm' @click.stop dense flat no-caps>
-                <q-tooltip v-if='notes[props.row.id]'> 
+                <q-btn color='dark' :icon='(notes[props.row.id] ? "fas" : "far") + " fa-comment-alt"' size='sm' @click.stop dense flat no-caps>
+                <q-tooltip v-if='notes[props.row.id]' class="bg-white text-dark q-pa-xs" style="border: 1px solid #f1f1f1;">
                   <div v-html='markdown(notes[props.row.id])'/>
                 </q-tooltip>
                 <q-popup-edit v-model='notes[props.row.id]' @update:model-value='v => onchange_notes(props.row.id, v)'
-                  auto-save v-slot="scope" style='max-width:400px'>
+                  auto-save v-slot="scope" style='max-width:300px'>
                   <q-input ref='textarea' type='textarea' rows=3 v-model='scope.value' 
-                  @update:model-value='v => markdown(v)' dense autofocus @keyup.enter.stop />
-                  <div v-html='markdown(scope.value)'/>
+                    dense autofocus @keyup.enter.stop />
+                    <div v-html='markdown(scope.value)' style="max-width:300px"/>
                   </q-popup-edit>
                 </q-btn>
               </q-td>
@@ -222,6 +222,7 @@ export default {
     }
   },
   setup() {
+    marked.use({ gfm: true });
     const q = useQuasar();
     return { q$: q }
   },
@@ -512,7 +513,7 @@ export default {
     },
     markdown(text) {
       if (text) {
-        return marked.parse(text);
+        return marked.parse(text, { gfm: true });
       } else {
         return '';
       }
@@ -523,9 +524,10 @@ export default {
 
 <style lang='scss' scoped>
 tbody tr td {
-  padding: 8px;
+  padding: 4px;
 }
 thead tr th {
   padding: 8px;
 }
+
 </style>

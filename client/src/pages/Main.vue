@@ -97,7 +97,7 @@
 
                 <!-- notes -->
                 <q-btn color='dark' :icon='(notes[props.row.id] ? "fas" : "far") + " fa-comment-alt"' size='sm' @click.stop dense flat no-caps>
-                <q-tooltip v-if='notes[props.row.id]' class="bg-white text-dark q-pa-xs" style="border: 1px solid #f1f1f1;">
+                <q-tooltip v-if='notes[props.row.id]' class="bg-white text-dark q-pa-xs" style="border: 1px solid #f1f1f1; font-size:1em">
                   <div v-html='markdown(notes[props.row.id])'/>
                 </q-tooltip>
                 <q-popup-edit v-model='notes[props.row.id]' @update:model-value='v => onchange_notes(props.row.id, v)'

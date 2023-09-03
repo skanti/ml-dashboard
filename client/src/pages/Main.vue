@@ -31,7 +31,7 @@
   <!-- table -->
   <div class='row q-pa-sm q-col-gutter-md'>
     <div class='col-12 col-sm-3'>
-      <q-card color='blue-5'>
+      <q-card color='blue-5' flat bordered>
         <q-table ref='my_table' tabindex='0' title='Experiments' :rows='experiments' :loading='loading'
           :columns='columns' :pagination='pagination' row-key='id' :filter='{}' :filter-method='filter_method' @row-click='click_experiment'>
           <!-- header -->
@@ -160,9 +160,9 @@
       <div class='row q-col-gutter-md' >
         <div :class='"col-12 col-sm-" + card_size' v-for='[k,v] in Object.entries(charts)'
           :key='"root_plot" + k + "_idx" + counter'>
-          <q-card class='bg-grey-1'>
+          <q-card class='bg-grey-1' flat bordered>
             <q-responsive :ratio='1'>
-              <Chart :metric='k' :data='v' :settings='settings'/>
+              <Chart :metric="k" :data="v" :settings="settings"/>
             </q-responsive>
           </q-card>
         </div>

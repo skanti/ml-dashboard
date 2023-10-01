@@ -1,10 +1,10 @@
 <template>
   <!-- search bar -->
   <div class='row q-pa-sm q-gutter-sm'>
-    <q-input class='q-pa-none' v-model='project_dir' label='Project Directory' outlined bottom-slots>
+  <q-input class='q-pa-none' v-model='project_dir' label='Project Directory'
+      outlined bottom-slots style='min-width:400px'>
       <template v-slot:prepend>
-        <q-icon name='fas fa-folder'/>
-        <q-btn-dropdown flat>
+        <q-btn-dropdown size="sm" flat dense>
           <q-list>
             <q-item v-for='v in project_dir_history' :key='"hist" + v' @click="() => { project_dir = v; }" v-close-popup clickable>
               <q-item-section>
@@ -16,7 +16,7 @@
       </template>
       <template v-slot:append>
         <q-icon name='fas fa-times' @click='project_dir = ""' class='cursor-pointer'/>
-        <q-btn @click='click_search_experiments' label='Checkout'
+        <q-btn @click='click_search_experiments'
           color='blue-5' icon='fas fa-sign-in-alt' :disable='project_dir == ""' unelevated dense/>
       </template>
     </q-input>

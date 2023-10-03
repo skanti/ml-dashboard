@@ -205,6 +205,7 @@ export default {
         { value: -1, color: 'red-5', icon: 'fas fa-minus-circle', label: 'failure' },
         { value: -2, color: 'purple-5', icon: 'fas fa-bug', label: 'bug' },
         { value: -3, color: 'black', icon: 'fas fa-skull-crossbones', label: 'crash' },
+        { value: -4, color: 'black', icon: 'fas fa-eye', label: 'hide' },
         { value: undefined, color: 'dark', icon: '', label: '' }
       ],
       loading: false,

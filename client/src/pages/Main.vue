@@ -491,12 +491,12 @@ export default {
     click_download_state_dict() {
       const state = this.$store.state;
       const text = JSON.stringify(state);
-      console.log(text);
       const a = document.createElement('a');
       const blob = new Blob([text], {type: 'txt'});
       const url = URL.createObjectURL(blob);
+      const timestamp = format(new Date(), 'yyyy-MMM-dd');
       a.setAttribute('href', url);
-      a.setAttribute('download', 'ml_state_dict.json');
+      a.setAttribute('download', `ml_state_dict_${timestamp}.json`);
       a.click();
     },
     click_upload_state_dict(file) {

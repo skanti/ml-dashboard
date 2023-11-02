@@ -59,7 +59,7 @@ app.get("/api/experiment", function (req, res, next) {
     const data = [];
     //const parser = csv({cast: true, columns: true});
     for (const log_dir of outputs) {
-      // HACK: needed to avoid loading from cache (eg.g. mounted S3 bucket)
+      // HACK: needed to avoid loading from cache (eg. mounted S3 bucket)
       spawnSync('ls', [log_dir]);
 
       // check csv file
@@ -67,9 +67,13 @@ app.get("/api/experiment", function (req, res, next) {
       if (!fs.existsSync(csv_path)) {
         continue
       }
-      const buff = fs.readFileSync(csv_path);
-      const rows = csv(buff, {cast: true, columns: true, skipComments: true } );
-      data.push(rows);
+      try {
+        const buff = fs.readFileSync(csv_path);
+        const rows = csv(buff, {cast: true, columns: true, skipComments: true } );
+        data.push(rows);
+      } catch(err) {
+        return res.status(500).send();
+      }
     }
     // send
     res.send(data.flat());

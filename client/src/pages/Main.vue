@@ -15,9 +15,9 @@
         </q-btn-dropdown>
       </template>
       <template v-slot:append>
-        <q-icon name='fas fa-times' @click='project_dir = ""' class='cursor-pointer'/>
+        <q-btn icon='fas fa-times' color="red-5" @click='project_dir = ""' flat dense/>
         <q-btn @click='click_search_experiments'
-          color='blue-5' icon='fas fa-sign-in-alt' :disable='project_dir == ""' unelevated dense/>
+          color='blue-5' icon='fas fa-sign-in-alt' :disable='project_dir == ""' flat  dense/>
       </template>
     </q-input>
     <q-btn label='Dump State' color='dark' icon='fas fa-download' 
@@ -40,8 +40,11 @@
               <q-card-section class='q-pa-sm'>
                 <!-- fuzzy search -->
                 <q-input dense debounce='500' v-model='search' placeholder='Fuzzy Search'>
-                  <template v-slot:append>
+                  <template v-slot:prepend>
                     <q-icon name='fas fa-search' />
+                  </template>
+                  <template v-slot:append>
+                    <q-btn icon='fas fa-times' color="red-5" @click="search = ''" flat dense/>
                   </template>
                 </q-input>
               </q-card-section>

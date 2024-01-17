@@ -486,7 +486,7 @@ export default {
       return hit;
     },
     parse_datetime(timestamp) {
-      return format(new Date(timestamp), 'yy-MMM-dd HH-mm-ss')
+      return format(new Date(timestamp), 'HH:mm , dd-MMM-yyyy')
     },
     click_download_state_dict() {
       const state = this.$store.state;

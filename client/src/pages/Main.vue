@@ -284,7 +284,7 @@ export default {
         const plot_data0 = this.data[id]['rows'];
 
         // group & find metrics from header
-        const meta_fields = ['step', 'epoch', 'stage'];
+        const meta_fields = ['step', 'epoch', 'stage', 'time'];
         const metrics = lodash(plot_data0).flatMap(lodash.keys).uniq().value();
         plot_data0.metrics = metrics;
         // ignore fields ending with this pattern

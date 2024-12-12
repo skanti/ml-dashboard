@@ -69,14 +69,14 @@ export default {
             name: experiment_id + ' (train)',
             showlegend: !val_visible && train_visible,
             mode: 'scattergl+lines', //'lines' + (this.settings.show_markers ? '+markers' : ''),
-            line: { dash: 'dash', color: this.hex_to_rgba(experiment.color, 0.5), width: 1.0 },
+            line: { dash: 'dash', color: this.hex_to_rgba(experiment.color, 1.0), width: 1.0 },
           };
           const leading_dot = {
             x: [experiment.train.x.at(-1)],
             y: [experiment.train.y.at(-1)],
             text: [format(experiment.train.hint.at(-1) || new Date(), 'yy-MMM-dd HH-mm-ss')],
             marker: {
-              color: this.hex_to_rgba(experiment.color, 0.5),
+              color: this.hex_to_rgba(experiment.color, 1.0),
               symbol: 'circle'
             },
             showlegend: false,
@@ -135,6 +135,7 @@ export default {
         margin: { l: 30, t: 30.0, r : 5, b: 30, autoexpand: false },
         title : title,
         titlefont : {size : 16},
+        font: { color: "white" },
         pad : 0,
         xaxis: {
           title: 'Iteration',
@@ -152,7 +153,10 @@ export default {
         },
         showlegend : true,
         legend : { ...legend_pos, orientation : 'v', font : {size : 10},
-          bgcolor: 'rgba(255, 255, 255, 0.5)'},
+          bgcolor: 'rgba(255, 255, 255, 0.1)'
+        },
+         plot_bgcolor: "rgb(0, 0, 0)",
+         paper_bgcolor: "rgb(0, 0, 0)",
       }
 
       return layout;

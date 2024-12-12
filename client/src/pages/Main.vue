@@ -17,21 +17,21 @@
       <template v-slot:append>
         <q-btn icon='fas fa-times' color="red-5" @click='project_dir = ""' flat dense/>
         <q-btn @click='click_search_experiments'
-          color='blue-5' icon='fas fa-sign-in-alt' :disable='project_dir == ""' flat  dense/>
+          color='primary' icon='fas fa-sign-in-alt' :disable='project_dir == ""' flat  dense/>
       </template>
     </q-input>
-    <q-btn label='Dump State' color='dark' icon='fas fa-download' 
+    <q-btn label='Dump State' icon='fas fa-download' 
       @click='click_download_state_dict' flat dense no-caps/>
-    <q-file bg-color='white' label-color='dark' label='Load State' accept='.json'
+    <q-file label='Load State' accept='.json'
       @update:model-value='click_upload_state_dict' filled dense hide-bottom-space item-aligned>
-      <template v-slot:prepend> <q-icon color='dark' name='fas fa-upload' /> </template>
+      <template v-slot:prepend> <q-icon name='fas fa-upload' /> </template>
     </q-file>
   </div>
 
   <!-- table -->
   <div class='row q-pa-sm q-col-gutter-md'>
     <div class='col-12 col-sm-3'>
-      <q-card color='blue-5' flat bordered>
+      <q-card color='primary' flat bordered>
         <q-table ref='my_table' tabindex='0' title='Experiments' :rows='experiments' :loading='loading'
           :columns='columns' :pagination='pagination' row-key='id' :filter='{}' :filter-method='filter_method' @row-click='click_experiment'>
           <!-- header -->
@@ -67,23 +67,24 @@
 
           <!-- body -->
           <template v-slot:body='props'>
-            <q-tr class='cursor-pointer' :class='selected.has(props.row.id) ? "bg-blue-3" : "bg-grey-1"'
-              :props='props' @click='click_experiment(props.row)'>
-              <q-td key='color' :props='props' >
+            <q-tr class='cursor-pointer' :class='selected.has(props.row.id) ? "bg-primary" : "bg-transparent"'
+              :props="props" @click="click_experiment(props.row)">
+              <q-td key="color" :props="props" >
                 <q-avatar v-if='data[props.row.id] && selected.has(props.row.id)' size='sm'
                   icon='fas fa-palette' :style='"background-color: white; color:" + data[props.row.id].color'
                   @click.stop='click_color(props.row)' font-size='16px' />
               </q-td>
               <q-td  key='id' :props='props'>
+
                 <!-- experiment name -->
-                <q-btn color='dark' class='text-bold' size='sm'
+                <q-btn class='text-bold' size='sm'
                   @click='e => click_copy_to_clipboard(e, props.row.id)' flat dense no-caps>
                   <div class='ellipsis'> {{ props.row.id }} </div>
                   <q-tooltip> Copy to clipboard </q-tooltip>
                 </q-btn>
 
                 <!-- starring -->
-                <q-btn size='xs' :text-color='props.row.id in starred ? "yellow-8" : "dark"' :icon='props.row.id in starred ? "fas fa-star" : "far fa-star"'
+                <q-btn size='xs' :text-color='props.row.id in starred ? "yellow-8" : "white"' :icon='props.row.id in starred ? "fas fa-star" : "far fa-star"'
                   @click.stop='click_star(props.row)' flat dense/>
 
                 <!-- rating -->
@@ -99,7 +100,7 @@
                 </q-btn-dropdown>
 
                 <!-- notes -->
-                <q-btn color='dark' :icon='(notes[props.row.id] ? "fas" : "far") + " fa-comment-alt"' size='sm' @click.stop dense flat no-caps>
+                <q-btn :icon='(notes[props.row.id] ? "fas" : "far") + " fa-comment-alt"' size='sm' @click.stop dense flat no-caps>
                 <q-tooltip v-if='notes[props.row.id]' class="bg-white text-dark q-pa-xs" style="border: 1px solid #f1f1f1; font-size:1em">
                   <div v-html='markdown(notes[props.row.id])'/>
                 </q-tooltip>
@@ -134,28 +135,28 @@
         </q-btn>
         <q-field outlined dense>
           <template v-slot:control>
-            <q-option-group v-model='settings.curve_visibility' :options='show_curves_options' color='blue-5'
+            <q-option-group v-model='settings.curve_visibility' :options='show_curves_options' color='primary'
               type='checkbox' @update:model-value='v => onchange_settings()' dense inline />
           </template>
         </q-field>
         <q-input v-model='settings.smoothing_value' label='Smoothing' maxlength='10' style='max-width:200px'
           @update:model-value='v => onchange_settings({smoothing_value: v})' @debounce='1000' outlined dense >
           <template v-slot:append>
-            <q-toggle v-model='settings.smoothing_toggle' color='blue-5'
+            <q-toggle v-model='settings.smoothing_toggle' color='primary'
               @update:model-value='v => onchange_settings({smoothing_toggle: v})' keep-color />
-            <q-toggle v-model='settings.show_error_bars' color='blue-5' icon='fas fa-grip-lines'
+            <q-toggle v-model='settings.show_error_bars' color='primary' icon='fas fa-grip-lines'
               @update:model-value='v => onchange_settings({show_error_bars: v})' :disable='!settings.smoothing_toggle'/>
           </template>
         </q-input>
         <q-field outlined dense>
           <template v-slot:control>
-            <q-toggle label='Show markers' v-model='settings.show_markers' color='blue-5'
+            <q-toggle label='Show markers' v-model='settings.show_markers' color='primary'
               @update:model-value='v => onchange_settings()' dense />
           </template>
         </q-field>
         <q-field outlined dense>
           <template v-slot:control>
-            <q-toggle label='Log scale' v-model='settings.log_scale' color='blue-5'
+            <q-toggle label='Log scale' v-model='settings.log_scale' color='primary'
               @update:model-value='v => onchange_settings()' dense />
           </template>
         </q-field>
@@ -202,14 +203,14 @@ export default {
       charts: {},
       show_curves_options: [ { label: 'Show train', value: 'show_train' }, { label: 'Show val', value: 'show_val' } ],
       rating_options: [
-        { value: 0, color: 'blue-5', icon: 'fas fa-exclamation-circle', label: 'new' },
+        { value: 0, color: 'primary', icon: 'fas fa-exclamation-circle', label: 'new' },
         { value: 1, color: 'green-5', icon: 'fas fa-plus-circle', label: 'success' },
         { value: 2, color: 'orange-5', icon: 'fas fa-dot-circle', label: 'average' },
         { value: -1, color: 'red-5', icon: 'fas fa-minus-circle', label: 'failure' },
         { value: -2, color: 'purple-5', icon: 'fas fa-bug', label: 'bug' },
         { value: -3, color: 'black', icon: 'fas fa-skull-crossbones', label: 'crash' },
         { value: -4, color: 'black', icon: 'fas fa-eye', label: 'hide' },
-        { value: undefined, color: 'dark', icon: '', label: '' }
+        { value: undefined, color: 'white', icon: '', label: '' }
       ],
       loading: false,
       timer: {
@@ -233,6 +234,7 @@ export default {
   created() {
     this.click_refresh();
     this.auto_refresh();
+    this.q$.dark.set(true)
   },
   computed: {
     ...mapState(['settings']),

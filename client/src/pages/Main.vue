@@ -67,7 +67,7 @@
 
           <!-- body -->
           <template v-slot:body='props'>
-            <q-tr class='cursor-pointer' :class='selected.has(props.row.id) ? "bg-primary" : "bg-transparent"'
+            <q-tr class='cursor-pointer' :class='selected.has(props.row.id) ? "bg-grey-9" : "bg-transparent"'
               :props="props" @click="click_experiment(props.row)">
               <q-td key="color" :props="props" >
                 <q-avatar v-if='data[props.row.id] && selected.has(props.row.id)' size='sm'

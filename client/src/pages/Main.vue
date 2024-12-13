@@ -71,7 +71,7 @@
               :props="props" @click="click_experiment(props.row)">
               <q-td key="color" :props="props" >
                 <q-avatar v-if='data[props.row.id] && selected.has(props.row.id)' size='sm'
-                  icon='fas fa-palette' :style='"background-color: white; color:" + data[props.row.id].color'
+                  icon='fas fa-palette' :style='"color:" + data[props.row.id].color'
                   @click.stop='click_color(props.row)' font-size='16px' />
               </q-td>
               <q-td  key='id' :props='props'>

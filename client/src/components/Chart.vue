@@ -140,6 +140,7 @@ export default {
         xaxis: {
           title: 'Iteration',
           showgrid: true,
+          gridcolor: "rgb(0.2, 0.2, 0.2)",
           zeroline: false,
           rangemode: 'tozero',
         },
@@ -148,6 +149,7 @@ export default {
           title: yaxis_label,
           showline: false,
           showgrid: true,
+          gridcolor: "rgb(0.2, 0.2, 0.2)",
           zeroline: false,
           rangemode: 'tozero',
         },
@@ -155,8 +157,8 @@ export default {
         legend : { ...legend_pos, orientation : 'v', font : {size : 10},
           bgcolor: 'rgba(255, 255, 255, 0.1)'
         },
-         plot_bgcolor: "rgb(0, 0, 0)",
-         paper_bgcolor: "rgb(0, 0, 0)",
+        plot_bgcolor: "rgba(0, 0, 0, 0)",
+        paper_bgcolor: "rgba(0, 0, 0, 1.0)",
       }
 
       return layout;

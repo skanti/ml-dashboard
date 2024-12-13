@@ -1,24 +1,28 @@
 class ColorPalette {
   constructor() {
     this.palette = [
-      // dark green
-      '#033500',
-      //darkred
+      //darkslategray
       '#2f4f4f',
-      //olive
+      // mint
+      "#AAF0D1",
+      //darkred
       '#8b0000',
-      //darkorange
+      //olive
       '#808000',
-      //red
+      //darkorange
       '#ff8c00',
-      //deepskyblue
+      //red
       '#ff0000',
-      //blue
+      //deepskyblue
       '#00bfff',
-      //fuchsia
+      // peach
+      "#FFE5B4",
+      //blue
       '#0000ff',
+      //fuchsia
+      '#ff00ff',
       //mediumslateblue
-      '#ff1493',
+      '#7b68ee',
     ];
 
     this.num_max = this.palette.length;

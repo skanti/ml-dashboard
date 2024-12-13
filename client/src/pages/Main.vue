@@ -10,6 +10,9 @@
               <q-item-section>
                 <q-item-label>{{v}}</q-item-label>
               </q-item-section>
+              <q-item-section side>
+              <q-btn size="sm" color="red-5" icon="fas fa-trash" @click.stop="() => {project_dir_history = project_dir_history.filter(x => x !== v);}" flat dense/>
+              </q-item-section>
             </q-item>
           </q-list>
         </q-btn-dropdown>

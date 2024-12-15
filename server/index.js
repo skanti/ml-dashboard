@@ -26,7 +26,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // routes
 app.get("/api/project", function (req, res, next) {
   const { project_dir } = req.query;
-  const search_dir = project_dir + "/*";
+  const search_dir = project_dir.replace(/\$HOME/g, process.env.HOME) + "/*";
   const options = { };
   glob(search_dir, options, function (err, experiments) {
     if (err)
@@ -43,7 +43,7 @@ app.get("/api/project", function (req, res, next) {
 
 app.get("/api/experiment", function (req, res, next) {
   let { project_dir, experiment } = req.query;
-  const search_dir = project_dir + "/" + experiment.id + "/log/version_*";
+  const search_dir = project_dir.replace(/\$HOME/g, process.env.HOME) + "/" + experiment.id + "/log/version_*";
   const options = { };
   glob(search_dir, options, function (err, outputs) {
     if (err)
@@ -81,7 +81,8 @@ app.get("/api/experiment", function (req, res, next) {
 });
 
 app.get("/api/download", function (req, res, next) {
-  const { project_dir, experiment_name, output_name, out } = req.query;
+  let { project_dir, experiment_name, output_name, out } = req.query;
+  project_dir = project_dir.replace(/\$HOME/g, process.env.HOME);
   const out_filename = `${project_dir}/${experiment_name}/${output_name}/${out}.json`;
   res.sendFile(out_filename);
 });

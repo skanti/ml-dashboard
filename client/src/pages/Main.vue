@@ -72,12 +72,11 @@
           <template v-slot:body='props'>
             <q-tr class='cursor-pointer' :class='selected.has(props.row.id) ? "bg-grey-9" : "bg-transparent"'
               :props="props" @click="click_experiment(props.row)">
-              <q-td key="color" :props="props" >
-                <q-avatar v-if='data[props.row.id] && selected.has(props.row.id)' size='sm'
-                  icon='fas fa-palette' :style='"color:" + data[props.row.id].color'
-                  @click.stop='click_color(props.row)' font-size='16px' />
-              </q-td>
               <q-td  key='id' :props='props'>
+                <!-- color -->
+                <q-btn v-if='data[props.row.id] && selected.has(props.row.id)' size='sm'
+                  icon='fas fa-palette' :style='"color:" + data[props.row.id].color'
+                  @click.stop='click_color(props.row)' font-size='16px' dense flat />
 
                 <!-- experiment name -->
                 <q-btn class='text-bold' size='sm'
@@ -223,7 +222,6 @@ export default {
       card_size: 4,
       pagination: { sortBy: 'timestamp', descending: true, page: 1, rowsPerPage: 50 },
       columns: [
-        { name: 'color', align: 'left', label: 'Col', field: 'color' },
         { name: 'id', align: 'left', label: 'ID', field: 'id', sortable: true },
         { name: 'timestamp', align: 'left', label: 'Date', field: 'timestamp', sortable: true },
       ]

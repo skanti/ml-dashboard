@@ -82,7 +82,7 @@
                 <q-btn class='text-bold' size='sm'
                   @click='e => click_copy_to_clipboard(e, props.row.id)' flat dense no-caps>
                   <div class='ellipsis'> {{ props.row.id }} </div>
-                  <q-tooltip> Copy to clipboard </q-tooltip>
+                  <q-tooltip> {{ parse_datetime(props.row.timestamp) }} </q-tooltip>
                 </q-btn>
 
                 <!-- starring -->
@@ -114,9 +114,9 @@
                   </q-popup-edit>
                 </q-btn>
               </q-td>
-              <q-td key='timestamp' :props='props' >
-                <q-btn size='sm' icon='far fa-clock' dense flat>
-                  <q-tooltip> {{ parse_datetime(props.row.timestamp) }} </q-tooltip>
+
+              <q-td key='dummy' :props='props' >
+                <q-btn size='sm' :icon='selected.has(props.row.id) ? "far fa-check-square" : "fa-regular fa-square"' dense flat>
                 </q-btn>
               </q-td>
             </q-tr>
@@ -222,8 +222,8 @@ export default {
       card_size: 4,
       pagination: { sortBy: 'timestamp', descending: true, page: 1, rowsPerPage: 50 },
       columns: [
-        { name: 'id', align: 'left', label: 'ID', field: 'id', sortable: true },
-        { name: 'timestamp', align: 'left', label: 'Date', field: 'timestamp', sortable: true },
+        { name: 'id', align: 'left', label: 'Experiment', field: 'id', sortable: true },
+        { name: 'dummy', align: 'left', label: '', field: 'dummy' }
       ]
     }
   },
@@ -497,7 +497,7 @@ export default {
       return hit;
     },
     parse_datetime(timestamp) {
-      return format(new Date(timestamp), 'HH:mm , dd-MMM-yyyy')
+      return format(new Date(timestamp), 'dd-MMM-yyyy, HH:mm')
     },
     click_download_state_dict() {
       const state = this.$store.state;

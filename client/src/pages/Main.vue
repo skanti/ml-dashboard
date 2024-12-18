@@ -115,9 +115,11 @@
                 </q-btn>
               </q-td>
 
-              <q-td key='dummy' :props='props' >
-                <q-btn size='sm' :icon='selected.has(props.row.id) ? "far fa-check-square" : "fa-regular fa-square"' dense flat>
-                </q-btn>
+              <q-td key='selected' :props='props' >
+                <q-btn size='sm' :icon='selected.has(props.row.id) ? "far fa-check-square" : "fa-regular fa-square"' dense flat/>
+              </q-td>
+
+              <q-td key='timestamp' :props='props' >
               </q-td>
             </q-tr>
           </template>
@@ -222,8 +224,9 @@ export default {
       card_size: 4,
       pagination: { sortBy: 'timestamp', descending: true, page: 1, rowsPerPage: 50 },
       columns: [
-        { name: 'id', align: 'left', label: 'Experiment', field: 'id', sortable: true },
-        { name: 'dummy', align: 'left', label: '', field: 'dummy' }
+        { name: 'id', align: 'left', label: 'Experiment', field: 'id', sortable: false },
+        { name: 'selected', align: 'left', label: '' },
+        { name: 'timestamp', align: 'left', label: '', field: 'timestamp' }
       ]
     }
   },

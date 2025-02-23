@@ -25,8 +25,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // routes
 app.get("/api/project", function (req, res, next) {
-  const { project_dir } = req.query;
-  const search_dir = project_dir.replace(/\$HOME/g, process.env.HOME) + "/*";
+  let { project_dir } = req.query;
+  project_dir = project_dir
+    .replace(/\$HOME/g, process.env.HOME)
+    .replace(/\$EXP/g, process.env.EXP);
+  const search_dir = project_dir + "/*";
   const options = { };
   glob(search_dir, options, function (err, experiments) {
     if (err)
@@ -43,7 +46,10 @@ app.get("/api/project", function (req, res, next) {
 
 app.get("/api/experiment", function (req, res, next) {
   let { project_dir, experiment } = req.query;
-  const search_dir = project_dir.replace(/\$HOME/g, process.env.HOME) + "/" + experiment.id + "/log/version_*";
+  project_dir = project_dir
+    .replace(/\$HOME/g, process.env.HOME)
+    .replace(/\$EXP/g, process.env.EXP);
+  const search_dir = project_dir + "/" + experiment.id + "/log/version_*";
   const options = { };
   glob(search_dir, options, function (err, outputs) {
     if (err)
